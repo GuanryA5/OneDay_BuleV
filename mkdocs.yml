@@ -1,0 +1,94 @@
+site_name: BlueV Documentation
+site_description: 智能桌面自动化工具 - 现代化的工作流自动化解决方案
+site_url: https://guanrya5.github.io/OneDay_BuleV
+repo_url: https://github.com/GuanryA5/OneDay_BuleV
+repo_name: GuanryA5/OneDay_BuleV
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      primary: blue
+      accent: light-blue
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: blue
+      accent: light-blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.path
+    - navigation.indexes
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+
+plugins:
+  - search:
+      lang: zh
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [bluev]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: false
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+
+nav:
+  - 首页: index.md
+  - 快速开始:
+    - 安装指南: getting-started/installation.md
+    - 第一个工作流: getting-started/first-workflow.md
+    - 基础概念: getting-started/concepts.md
+  - 用户指南:
+    - 界面介绍: user-guide/interface.md
+    - 节点系统: user-guide/nodes.md
+    - 工作流设计: user-guide/workflows.md
+    - 自动化操作: user-guide/automation.md
+  - 开发文档:
+    - 项目架构: development/architecture.md
+    - 开发环境: development/setup.md
+    - 贡献指南: development/contributing.md
+    - DevOps 流程: development/devops.md
+  - API 参考:
+    - 核心模块: api/core.md
+    - 配置系统: api/config.md
+    - 工作流引擎: api/workflow.md
+    - 节点系统: api/nodes.md
+  - 示例:
+    - 基础示例: examples/basic.md
+    - 高级用法: examples/advanced.md
+    - 最佳实践: examples/best-practices.md

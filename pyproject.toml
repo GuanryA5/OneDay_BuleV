@@ -1,0 +1,125 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bluev"
+version = "0.1.0"
+description = "BlueV游戏自动化蓝图框架"
+authors = [{name = "BlueV Team", email = "team@bluev.dev"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+dependencies = [
+    "PySide6>=6.5.0,<7.0.0",
+    "opencv-python>=4.8.0,<5.0.0",
+    "numpy>=1.24.0,<2.0.0",
+    "Pillow>=10.0.0,<11.0.0",
+    "PyAutoGUI>=0.9.54",
+    "pygetwindow>=0.0.9",
+    "pynput>=1.7.6",
+    "SQLAlchemy>=2.0.0,<3.0.0",
+    "pydantic>=2.0.0,<3.0.0",
+    "python-dotenv>=1.0.0",
+    "loguru>=0.7.0",
+    "click>=8.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "pytest-qt>=4.2.0",
+    "ruff>=0.1.0",
+    "pre-commit>=3.3.0",
+    "mypy>=1.5.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.4.0",
+    "mkdocstrings[python]>=0.24.0",
+    "tox>=4.6.0",
+]
+
+[project.scripts]
+bluev = "bluev.main:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short --strict-markers"
+markers = [
+    "unit: 单元测试",
+    "integration: 集成测试",
+    "ui: UI测试",
+    "slow: 慢速测试",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90", "I", "N", "UP", "S", "B", "A", "C4", "T20"]
+ignore = ["E501", "S101", "T201", "N818", "UP009"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint.isort]
+known-first-party = ["bluev"]
+
+[tool.ruff.lint.per-file-ignores]
+# Scripts can use subprocess and have higher complexity
+"scripts/*.py" = ["S603", "S607", "C901", "S110", "F841", "B007", "UP036", "S103"]
+# Tests can use assert and have unused variables for fixtures
+"tests/*.py" = ["S101", "F841"]
+# Main module needs path setup before imports
+"bluev/main.py" = ["E402"]
+# Config module can raise without chaining for user-friendly errors
+"bluev/config.py" = ["B904"]
+# UI follows Qt naming conventions
+"bluev/ui/*.py" = ["N802"]
+# Activation script is external
+"activate.py" = ["S603"]

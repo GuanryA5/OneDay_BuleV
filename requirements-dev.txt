@@ -1,0 +1,23 @@
+# BlueV Development Dependencies
+
+# Testing Framework
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-mock>=3.11.0
+pytest-qt>=4.2.0
+
+# Modern Code Quality Tools
+ruff>=0.1.0
+pre-commit>=3.3.0
+mypy>=1.5.0
+
+# Documentation
+mkdocs>=1.5.0
+mkdocs-material>=9.4.0
+mkdocstrings[python]>=0.24.0
+
+# Build Tools
+build>=0.10.0
+setuptools>=68.0.0
+wheel>=0.41.0
+tox>=4.6.0

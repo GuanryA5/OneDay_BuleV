@@ -1,0 +1,45 @@
+# Windows-specific line ending configuration
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Force specific files to use LF (for cross-platform compatibility)
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
+
+# Force batch files to use CRLF (Windows requirement)
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# Documentation and config files
+README* text eol=lf
+LICENSE* text eol=lf
+CHANGELOG* text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# Python specific
+requirements*.txt text eol=lf
+setup.py text eol=lf
+setup.cfg text eol=lf
+pyproject.toml text eol=lf
+tox.ini text eol=lf
+.pre-commit-config.yaml text eol=lf
+
+# GitHub workflows
+.github/workflows/*.yml text eol=lf
+.github/workflows/*.yaml text eol=lf
