@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.cache/pypoetry
+        key: ${{ runner.os }}-python-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-python-${{ matrix.python-version }}-pip-
+          ${{ runner.os }}-python-
+          ${{ runner.os }}-
+
+    - name: Setup Windows environment
+      run: |
+        echo "Setting up Windows-specific environment"
+        echo "Python version: ${{ matrix.python-version }}"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+      continue-on-error: false
+
+    - name: Run Ruff linting
+      run: |
+        python -m ruff check . --output-format=github
+      continue-on-error: false
+
+    - name: Run Ruff formatting check
+      run: |
+        python -m ruff format --check .
+      continue-on-error: false
+
+    - name: Run tests
+      run: |
+        python -m pytest tests/ --cov=./bluev --cov-report=xml --cov-report=term-missing --tb=short -v
+      continue-on-error: false
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Run Trufflehog
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+        extra_args: --debug --only-verified
