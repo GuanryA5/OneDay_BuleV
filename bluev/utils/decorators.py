@@ -1,0 +1,239 @@
+# -*- coding: utf-8 -*-
+"""
+BlueV 装饰器模块
+
+提供各种实用的装饰器函数。
+"""
+
+import functools
+import time
+from typing import Any, Callable, Dict, Optional
+
+from bluev.utils.logging import get_logger
+
+
+def retry(
+    max_attempts: int = 3,
+    delay: float = 1.0,
+    backoff: float = 2.0,
+    exceptions: tuple = (Exception,),
+):
+    """重试装饰器
+
+    Args:
+        max_attempts: 最大重试次数
+        delay: 初始延迟时间（秒）
+        backoff: 延迟时间倍数
+        exceptions: 需要重试的异常类型
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            logger = get_logger(f"{func.__module__}.{func.__name__}")
+
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    if attempt == max_attempts - 1:
+                        logger.error(
+                            f"函数 {func.__name__} 重试 {max_attempts} 次后仍然失败",
+                            error=str(e),
+                            attempts=max_attempts,
+                        )
+                        raise
+
+                    wait_time = delay * (backoff**attempt)
+                    logger.warning(
+                        f"函数 {func.__name__} 第 {attempt + 1} 次执行失败，{wait_time:.2f}秒后重试",
+                        error=str(e),
+                        attempt=attempt + 1,
+                        wait_time=wait_time,
+                    )
+                    time.sleep(wait_time)
+
+            return None  # 不应该到达这里
+
+        return wrapper
+
+    return decorator
+
+
+def timeout(seconds: float):
+    """超时装饰器
+
+    Args:
+        seconds: 超时时间（秒）
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            import signal
+
+            def timeout_handler(signum, frame):
+                raise TimeoutError(f"函数 {func.__name__} 执行超时 ({seconds}秒)")
+
+            # 设置信号处理器
+            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(int(seconds))
+
+            try:
+                result = func(*args, **kwargs)
+                signal.alarm(0)  # 取消定时器
+                return result
+            finally:
+                signal.signal(signal.SIGALRM, old_handler)
+
+        return wrapper
+
+    return decorator
+
+
+def validate_types(**type_hints):
+    """类型验证装饰器
+
+    Args:
+        **type_hints: 参数名和对应的类型
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # 获取函数签名
+            import inspect
+
+            sig = inspect.signature(func)
+            bound_args = sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+
+            # 验证类型
+            for param_name, expected_type in type_hints.items():
+                if param_name in bound_args.arguments:
+                    value = bound_args.arguments[param_name]
+                    if value is not None and not isinstance(value, expected_type):
+                        raise TypeError(
+                            f"参数 {param_name} 期望类型 {expected_type.__name__}，"
+                            f"实际类型 {type(value).__name__}"
+                        )
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def cache_result(ttl: Optional[float] = None):
+    """结果缓存装饰器
+
+    Args:
+        ttl: 缓存生存时间（秒），None 表示永久缓存
+    """
+
+    def decorator(func: Callable) -> Callable:
+        cache: Dict[str, Dict[str, Any]] = {}
+
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # 生成缓存键
+            cache_key = str(hash((args, tuple(sorted(kwargs.items())))))
+
+            # 检查缓存
+            if cache_key in cache:
+                cached_data = cache[cache_key]
+
+                # 检查TTL
+                if ttl is None or time.time() - cached_data["timestamp"] < ttl:
+                    return cached_data["result"]
+                else:
+                    # 缓存过期，删除
+                    del cache[cache_key]
+
+            # 执行函数并缓存结果
+            result = func(*args, **kwargs)
+            cache[cache_key] = {"result": result, "timestamp": time.time()}
+
+            return result
+
+        # 添加清除缓存的方法
+        wrapper.clear_cache = lambda: cache.clear()
+        wrapper.cache_info = lambda: {
+            "cache_size": len(cache),
+            "cache_keys": list(cache.keys()),
+        }
+
+        return wrapper
+
+    return decorator
+
+
+def singleton(cls):
+    """单例装饰器"""
+    instances = {}
+
+    @functools.wraps(cls)
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+
+def deprecated(reason: str = ""):
+    """废弃警告装饰器
+
+    Args:
+        reason: 废弃原因
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            import warnings
+
+            message = f"函数 {func.__name__} 已废弃"
+            if reason:
+                message += f": {reason}"
+
+            warnings.warn(message, DeprecationWarning, stacklevel=2)
+
+            logger = get_logger(f"{func.__module__}.{func.__name__}")
+            logger.warning("使用了废弃的函数", function=func.__name__, reason=reason)
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def safe_call(default_return: Any = None, log_errors: bool = True):
+    """安全调用装饰器，捕获异常并返回默认值
+
+    Args:
+        default_return: 发生异常时的默认返回值
+        log_errors: 是否记录错误日志
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                if log_errors:
+                    logger = get_logger(f"{func.__module__}.{func.__name__}")
+                    logger.error(
+                        f"函数 {func.__name__} 执行失败，返回默认值",
+                        error=str(e),
+                        default_return=default_return,
+                        exc_info=True,
+                    )
+                return default_return
+
+        return wrapper
+
+    return decorator
