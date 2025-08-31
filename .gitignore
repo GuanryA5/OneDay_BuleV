@@ -13,7 +13,7 @@ __pycache__/
 .ruff_cache/
 memory-bank/
 script/
-docs/
+# docs/ - Don't ignore docs directory, we need it for GitHub Pages
 
 # Distribution / packaging
 .Python
@@ -145,7 +145,7 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-/site
+#/site
 
 # mypy
 .mypy_cache/
