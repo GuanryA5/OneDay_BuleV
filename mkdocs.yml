@@ -69,26 +69,27 @@ markdown_extensions:
 
 nav:
   - 首页: index.md
-  - 快速开始:
-    - 安装指南: getting-started/installation.md
-    - 第一个工作流: getting-started/first-workflow.md
-    - 基础概念: getting-started/concepts.md
-  - 用户指南:
-    - 界面介绍: user-guide/interface.md
-    - 节点系统: user-guide/nodes.md
-    - 工作流设计: user-guide/workflows.md
-    - 自动化操作: user-guide/automation.md
-  - 开发文档:
-    - 项目架构: development/architecture.md
-    - 开发环境: development/setup.md
-    - 贡献指南: development/contributing.md
-    - DevOps 流程: development/devops.md
-  - API 参考:
-    - 核心模块: api/core.md
-    - 配置系统: api/config.md
-    - 工作流引擎: api/workflow.md
-    - 节点系统: api/nodes.md
-  - 示例:
-    - 基础示例: examples/basic.md
-    - 高级用法: examples/advanced.md
-    - 最佳实践: examples/best-practices.md
+  - 项目文档:
+    - 项目简介: brief.md
+    - 产品需求文档: PRD_v1.0.md
+    - 技术实现方案: tech_implementation.md
+  - 架构设计:
+    - 系统架构设计: arch/BlueV_Architecture_Design.md
+    - 实施路线图: arch/Implementation_Roadmap.md
+    - 节点系统实现: arch/Node_System_Implementation.md
+    - 实时通信设计: arch/Real_Time_Communication.md
+    - 工作流引擎设计: arch/Workflow_Engine_Design.md
+  - UI 设计:
+    - 主界面设计规范: UI_Design/MainUI_Design_Specification.md
+    - 节点编辑器设计: UI_Design/NodeEditor_Design_specifcation.md
+    - 节点UI设计规范: UI_Design/NodeUI_Design_Specification.md
+  - 开发指南:
+    - 最佳实践: development/best-practices.md
+    - DevOps 检查清单: development/devops-checklist.md
+    - DevOps 指南: development/devops-guide.md
+    - DevOps 实施计划: development/devops-implementation-plan.md
+    - 项目状态: development/project-status.md
+    - 故障排除: development/troubleshooting.md
+  - CI/CD 状态:
+    - 构建状态报告: CI_CD_STATUS_REPORT.md
+    - GitHub Pages 设置: GITHUB_PAGES_SETUP.md
