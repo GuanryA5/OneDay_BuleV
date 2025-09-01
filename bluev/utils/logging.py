@@ -152,7 +152,7 @@ class StructuredLogger:
         self.name = name
         self.logger = logger  # 基础 loguru logger（不在此处预绑定）
 
-    def _log_structured(self, level: str, message: str, **kwargs) -> None:
+    def _log_structured(self, level: str, message: str, **kwargs: Any) -> None:
         """记录结构化日志（按调用时绑定，满足单测期望）"""
         extra_data = {
             "timestamp": datetime.now().isoformat(),
@@ -161,39 +161,37 @@ class StructuredLogger:
         }
 
         # 在调用处绑定（包含 name 与结构化字段），确保 mock_logger.bind(...) 返回的对象直接接收 debug/info 等调用
-        bound_logger = getattr(self, "logger", "Unknown").bind(
-            name=getattr(self, "name", "Unknown"), **extra_data
-        )
+        bound_logger = self.logger.bind(name=self.name, **extra_data)
         getattr(bound_logger, level.lower())(message)
 
-    def debug(self, message: str, **kwargs) -> None:
+    def debug(self, message: str, **kwargs: Any) -> None:
         """调试日志"""
         self._log_structured("DEBUG", message, **kwargs)
 
-    def info(self, message: str, **kwargs) -> None:
+    def info(self, message: str, **kwargs: Any) -> None:
         """信息日志"""
         self._log_structured("INFO", message, **kwargs)
 
-    def warning(self, message: str, **kwargs) -> None:
+    def warning(self, message: str, **kwargs: Any) -> None:
         """警告日志"""
         self._log_structured("WARNING", message, **kwargs)
 
-    def error(self, message: str, exc_info: bool = False, **kwargs) -> None:
+    def error(self, message: str, exc_info: bool = False, **kwargs: Any) -> None:
         """错误日志"""
         if exc_info:
             kwargs["exc_info"] = True
         self._log_structured("ERROR", message, **kwargs)
 
-    def critical(self, message: str, **kwargs) -> None:
+    def critical(self, message: str, **kwargs: Any) -> None:
         """严重错误日志"""
         self._log_structured("CRITICAL", message, **kwargs)
 
-    def exception(self, message: str, **kwargs) -> None:
+    def exception(self, message: str, **kwargs: Any) -> None:
         """异常日志（自动包含异常信息）"""
         self.error(message, exc_info=True, **kwargs)
 
 
-def get_logger(name: Optional[str] = None):
+def get_logger(name: Optional[str] = None) -> StructuredLogger:
     """获取日志记录器，确保控制台 UTF-8 输出避免中文乱码"""
     _ensure_utf8_console_sink()
 
@@ -207,10 +205,10 @@ def get_logger(name: Optional[str] = None):
     return StructuredLogger(name)
 
 
-def log_performance(func):
+def log_performance(func: Callable[..., Any]) -> Callable[..., Any]:
     """性能日志装饰器"""
 
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         import time
 
         start_time = time.time()
@@ -246,7 +244,7 @@ def log_performance(func):
     return wrapper
 
 
-def log_method_calls(cls):
+def log_method_calls(cls: type) -> type:
     """类方法调用日志装饰器"""
     get_logger(f"{cls.__module__}.{cls.__name__}")
 

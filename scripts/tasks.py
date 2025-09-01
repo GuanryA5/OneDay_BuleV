@@ -288,6 +288,7 @@ def task_dev(args) -> None:
 
     run_command(["conda", "run", "-n", "bluev-dev", "python", "-m", "bluev"])
 
+
 def task_health(args) -> None:
     """环境健康检查"""
     log_info("🏥 运行环境健康检查")
@@ -299,6 +300,7 @@ def task_health(args) -> None:
         cmd.extend(["--output", args.output])
 
     run_command(cmd, check=False)
+
 
 def task_deps(args) -> None:
     """依赖版本监控"""

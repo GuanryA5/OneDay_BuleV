@@ -66,6 +66,23 @@ class ConfigModel(BaseModel):
 class Config:
     """BlueV 应用程序配置类"""
 
+    # 类型注解 - 这些属性在 _initialize_config 中动态设置
+    APP_NAME: str
+    APP_VERSION: str
+    DEBUG: bool
+    LOG_LEVEL: str
+    DATA_DIR: Path
+    TEMP_DIR: Path
+    LOGS_DIR: Path
+    WORKFLOWS_DIR: Path
+    SCREENSHOTS_DIR: Path
+    RESOURCES_DIR: Path
+    DATABASE_URL: str
+    WINDOW_WIDTH: int
+    WINDOW_HEIGHT: int
+    WINDOW_MIN_WIDTH: int
+    WINDOW_MIN_HEIGHT: int
+
     def __init__(self, config_file: Optional[Path] = None) -> None:
         # 项目根目录
         self.PROJECT_ROOT = Path(__file__).parent.parent
@@ -97,7 +114,12 @@ class Config:
         if config_file.exists():
             try:
                 with open(config_file, encoding="utf-8") as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    if isinstance(data, dict):
+                        return data
+                    else:
+                        raise BlueVConfigurationError(f"配置文件 {config_file} 格式错误：根对象必须是字典")
+
             except (OSError, json.JSONDecodeError) as e:
                 raise BlueVConfigurationError(f"无法加载配置文件 {config_file}: {e}")
         return {}
@@ -131,7 +153,10 @@ class Config:
                 config_data.update(self._config_data)
 
             # 验证配置
-            self._model = ConfigModel(**config_data)
+            try:
+                self._model = ConfigModel(**config_data)
+            except Exception as e:
+                raise BlueVConfigurationError(f"配置验证失败: {e}") from e
 
             # 设置属性
             for key, value in self._model.model_dump().items():

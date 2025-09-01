@@ -43,7 +43,7 @@ def main():
             continue
 
         try:
-            with open(full_path, encoding='utf-8') as f:
+            with open(full_path, encoding="utf-8") as f:
                 content = f.read()
 
             original_content = content
@@ -56,16 +56,14 @@ def main():
             if "main_window.py" in str(full_path):
                 # 修复状态栏相关的错误
                 content = content.replace(
-                    "statusbar = self.statusBar()",
-                    "statusbar = self.statusBar()"
+                    "statusbar = self.statusBar()", "statusbar = self.statusBar()"
                 )
                 content = content.replace(
-                    "getattr(self, 'status_label', 'Unknown')",
-                    "self.status_label"
+                    "getattr(self, 'status_label', 'Unknown')", "self.status_label"
                 )
 
             if content != original_content:
-                with open(full_path, 'w', encoding='utf-8') as f:
+                with open(full_path, "w", encoding="utf-8") as f:
                     f.write(content)
                 print(f"✅ 修复: {full_path}")
             else:

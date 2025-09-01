@@ -273,7 +273,9 @@ class ClickNode(BaseNode):
 
         return actual_clicks
 
-    def _perform_single_click(self, x: int, y: int, button: str, duration: float) -> None:
+    def _perform_single_click(
+        self, x: int, y: int, button: str, duration: float
+    ) -> None:
         """执行单次点击"""
         adapter = get_system_adapter()
         if duration > 0:
@@ -285,7 +287,9 @@ class ClickNode(BaseNode):
             # 普通点击
             adapter.click(x, y, button=button)
 
-    def _generate_result(self, params: Dict[str, Any], actual_clicks: int, start_time: float) -> Dict[str, Any]:
+    def _generate_result(
+        self, params: Dict[str, Any], actual_clicks: int, start_time: float
+    ) -> Dict[str, Any]:
         """生成执行结果"""
         execution_time = time.time() - start_time
         success = actual_clicks > 0
@@ -308,7 +312,9 @@ class ClickNode(BaseNode):
 
         return result
 
-    def _generate_error_result(self, error: Exception, start_time: float) -> Dict[str, Any]:
+    def _generate_error_result(
+        self, error: Exception, start_time: float
+    ) -> Dict[str, Any]:
         """生成错误结果"""
         execution_time = time.time() - start_time
         self.logger.error(f"点击执行失败: {error}")

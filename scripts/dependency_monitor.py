@@ -18,15 +18,18 @@ from typing import Dict, List, Optional
 # 项目根目录
 PROJECT_ROOT = Path(__file__).parent.parent
 
+
 class Colors:
     """终端颜色定义"""
-    RED = '\033[0;31m'
-    GREEN = '\033[0;32m'
-    YELLOW = '\033[1;33m'
-    BLUE = '\033[0;34m'
-    PURPLE = '\033[0;35m'
-    CYAN = '\033[0;36m'
-    NC = '\033[0m'  # No Color
+
+    RED = "\033[0;31m"
+    GREEN = "\033[0;32m"
+    YELLOW = "\033[1;33m"
+    BLUE = "\033[0;34m"
+    PURPLE = "\033[0;35m"
+    CYAN = "\033[0;36m"
+    NC = "\033[0m"  # No Color
+
 
 class DependencyMonitor:
     """依赖监控器"""
@@ -66,14 +69,14 @@ class DependencyMonitor:
         self.log_info("📦 获取已安装包列表...")
 
         # 使用 conda run 在 bluev-dev 环境中执行
-        result = self.run_command([
-            "conda", "run", "-n", "bluev-dev", "pip", "list", "--format=json"
-        ])
+        result = self.run_command(
+            ["conda", "run", "-n", "bluev-dev", "pip", "list", "--format=json"]
+        )
 
         if result and result.returncode == 0:
             try:
                 packages = json.loads(result.stdout)
-                package_dict = {pkg['name']: pkg['version'] for pkg in packages}
+                package_dict = {pkg["name"]: pkg["version"] for pkg in packages}
                 self.log_success(f"找到 {len(package_dict)} 个已安装包")
                 return package_dict
             except json.JSONDecodeError as e:
@@ -89,7 +92,7 @@ class DependencyMonitor:
 
         req_files = {
             "core": PROJECT_ROOT / "requirements.txt",
-            "dev": PROJECT_ROOT / "requirements-dev.txt"
+            "dev": PROJECT_ROOT / "requirements-dev.txt",
         }
 
         all_requirements = {}
@@ -97,15 +100,15 @@ class DependencyMonitor:
         for req_type, req_file in req_files.items():
             if req_file.exists():
                 try:
-                    with open(req_file, encoding='utf-8') as f:
+                    with open(req_file, encoding="utf-8") as f:
                         lines = f.readlines()
 
                     packages = []
                     for line in lines:
                         line = line.strip()
-                        if line and not line.startswith('#'):
+                        if line and not line.startswith("#"):
                             # 解析包名和版本要求
-                            match = re.match(r'^([a-zA-Z0-9_-]+)', line)
+                            match = re.match(r"^([a-zA-Z0-9_-]+)", line)
                             if match:
                                 packages.append(line)
 
@@ -123,9 +126,18 @@ class DependencyMonitor:
         """检查过时的包"""
         self.log_info("🔍 检查过时的包...")
 
-        result = self.run_command([
-            "conda", "run", "-n", "bluev-dev", "pip", "list", "--outdated", "--format=json"
-        ])
+        result = self.run_command(
+            [
+                "conda",
+                "run",
+                "-n",
+                "bluev-dev",
+                "pip",
+                "list",
+                "--outdated",
+                "--format=json",
+            ]
+        )
 
         if result and result.returncode == 0:
             try:
@@ -133,10 +145,10 @@ class DependencyMonitor:
                 outdated_dict = {}
 
                 for pkg in outdated:
-                    outdated_dict[pkg['name']] = {
-                        'current': pkg['version'],
-                        'latest': pkg['latest_version'],
-                        'type': pkg.get('latest_filetype', 'unknown')
+                    outdated_dict[pkg["name"]] = {
+                        "current": pkg["version"],
+                        "latest": pkg["latest_version"],
+                        "type": pkg.get("latest_filetype", "unknown"),
                     }
 
                 if outdated_dict:
@@ -160,22 +172,22 @@ class DependencyMonitor:
         self.log_info("🔒 检查安全漏洞...")
 
         # 尝试使用 pip-audit (如果可用)
-        result = self.run_command([
-            "conda", "run", "-n", "bluev-dev", "pip-audit", "--format=json"
-        ])
+        result = self.run_command(
+            ["conda", "run", "-n", "bluev-dev", "pip-audit", "--format=json"]
+        )
 
         if result and result.returncode == 0:
             try:
                 audit_data = json.loads(result.stdout)
-                vulnerabilities = audit_data.get('vulnerabilities', [])
+                vulnerabilities = audit_data.get("vulnerabilities", [])
 
                 if vulnerabilities:
                     self.log_warning(f"发现 {len(vulnerabilities)} 个安全漏洞")
                     for vuln in vulnerabilities:
-                        package = vuln.get('package', 'unknown')
-                        version = vuln.get('installed_version', 'unknown')
-                        advisory = vuln.get('advisory', {})
-                        severity = advisory.get('severity', 'unknown')
+                        package = vuln.get("package", "unknown")
+                        version = vuln.get("installed_version", "unknown")
+                        advisory = vuln.get("advisory", {})
+                        severity = advisory.get("severity", "unknown")
 
                         print(f"  🚨 {package} v{version}: {severity}")
                         print(f"     {advisory.get('summary', 'No description')}")
@@ -204,39 +216,39 @@ class DependencyMonitor:
 
         # 分析核心依赖状态
         core_deps_status = {}
-        if 'core' in requirements:
-            for req in requirements['core']:
-                pkg_name = re.match(r'^([a-zA-Z0-9_-]+)', req).group(1)
+        if "core" in requirements:
+            for req in requirements["core"]:
+                pkg_name = re.match(r"^([a-zA-Z0-9_-]+)", req).group(1)
                 if pkg_name in installed:
                     core_deps_status[pkg_name] = {
-                        'installed': True,
-                        'version': installed[pkg_name],
-                        'outdated': pkg_name in outdated,
-                        'requirement': req
+                        "installed": True,
+                        "version": installed[pkg_name],
+                        "outdated": pkg_name in outdated,
+                        "requirement": req,
                     }
                 else:
                     core_deps_status[pkg_name] = {
-                        'installed': False,
-                        'version': None,
-                        'outdated': False,
-                        'requirement': req
+                        "installed": False,
+                        "version": None,
+                        "outdated": False,
+                        "requirement": req,
                     }
 
         # 生成报告
         report = {
-            'timestamp': datetime.now().isoformat(),
-            'summary': {
-                'total_installed': len(installed),
-                'core_dependencies': len(core_deps_status),
-                'dev_dependencies': len(requirements.get('dev', [])),
-                'outdated_packages': len(outdated),
-                'security_issues': len(self.security_issues)
+            "timestamp": datetime.now().isoformat(),
+            "summary": {
+                "total_installed": len(installed),
+                "core_dependencies": len(core_deps_status),
+                "dev_dependencies": len(requirements.get("dev", [])),
+                "outdated_packages": len(outdated),
+                "security_issues": len(self.security_issues),
             },
-            'installed_packages': installed,
-            'requirements': requirements,
-            'core_dependencies_status': core_deps_status,
-            'outdated_packages': outdated,
-            'security_issues': self.security_issues
+            "installed_packages": installed,
+            "requirements": requirements,
+            "core_dependencies_status": core_deps_status,
+            "outdated_packages": outdated,
+            "security_issues": self.security_issues,
         }
 
         return report
@@ -246,28 +258,32 @@ class DependencyMonitor:
         print(f"\n{Colors.CYAN}📊 依赖状态摘要{Colors.NC}")
         print("=" * 50)
 
-        summary = report['summary']
+        summary = report["summary"]
 
         print(f"📦 总安装包数: {summary['total_installed']}")
         print(f"🎯 核心依赖: {summary['core_dependencies']}")
         print(f"🛠️ 开发依赖: {summary['dev_dependencies']}")
 
-        if summary['outdated_packages'] > 0:
-            print(f"{Colors.YELLOW}📈 过时包数: {summary['outdated_packages']}{Colors.NC}")
+        if summary["outdated_packages"] > 0:
+            print(
+                f"{Colors.YELLOW}📈 过时包数: {summary['outdated_packages']}{Colors.NC}"
+            )
         else:
-            print(f"{Colors.GREEN}📈 过时包数: {summary['outdated_packages']}{Colors.NC}")
+            print(
+                f"{Colors.GREEN}📈 过时包数: {summary['outdated_packages']}{Colors.NC}"
+            )
 
-        if summary['security_issues'] > 0:
+        if summary["security_issues"] > 0:
             print(f"{Colors.RED}🚨 安全问题: {summary['security_issues']}{Colors.NC}")
         else:
             print(f"{Colors.GREEN}🚨 安全问题: {summary['security_issues']}{Colors.NC}")
 
         # 核心依赖状态
         print(f"\n{Colors.CYAN}🎯 核心依赖状态{Colors.NC}")
-        core_status = report['core_dependencies_status']
+        core_status = report["core_dependencies_status"]
 
-        installed_count = sum(1 for dep in core_status.values() if dep['installed'])
-        outdated_count = sum(1 for dep in core_status.values() if dep['outdated'])
+        installed_count = sum(1 for dep in core_status.values() if dep["installed"])
+        outdated_count = sum(1 for dep in core_status.values() if dep["outdated"])
 
         print(f"✅ 已安装: {installed_count}/{len(core_status)}")
         if outdated_count > 0:
@@ -286,25 +302,27 @@ class DependencyMonitor:
 
     def calculate_health_score(self, report: Dict) -> int:
         """计算依赖健康评分"""
-        summary = report['summary']
-        core_status = report['core_dependencies_status']
+        summary = report["summary"]
+        core_status = report["core_dependencies_status"]
 
         # 基础分数
         score = 100
 
         # 核心依赖缺失扣分
-        missing_core = sum(1 for dep in core_status.values() if not dep['installed'])
+        missing_core = sum(1 for dep in core_status.values() if not dep["installed"])
         score -= missing_core * 20
 
         # 过时包扣分
-        score -= min(summary['outdated_packages'] * 2, 20)
+        score -= min(summary["outdated_packages"] * 2, 20)
 
         # 安全问题扣分
-        score -= summary['security_issues'] * 10
+        score -= summary["security_issues"] * 10
 
         return max(0, score)
 
-    def run_monitor(self, check_updates: bool = True, security_scan: bool = False) -> Dict:
+    def run_monitor(
+        self, check_updates: bool = True, security_scan: bool = False
+    ) -> Dict:
         """运行依赖监控"""
         print(f"{Colors.CYAN}📦 BlueV 依赖版本监控{Colors.NC}")
         print("=" * 50)
@@ -315,19 +333,22 @@ class DependencyMonitor:
         # 检查安全漏洞 (如果启用)
         if security_scan:
             self.security_issues = self.check_security_vulnerabilities()
-            report['security_issues'] = self.security_issues
+            report["security_issues"] = self.security_issues
 
         # 打印摘要
         self.print_summary(report)
 
         return report
 
+
 def main():
     """主函数"""
     import argparse
 
     parser = argparse.ArgumentParser(description="BlueV 依赖版本监控")
-    parser.add_argument("--check-updates", action="store_true", default=True, help="检查包更新")
+    parser.add_argument(
+        "--check-updates", action="store_true", default=True, help="检查包更新"
+    )
     parser.add_argument("--security-scan", action="store_true", help="执行安全扫描")
     parser.add_argument("--output", help="输出报告到 JSON 文件")
 
@@ -335,28 +356,29 @@ def main():
 
     # 切换到项目根目录
     import os
+
     os.chdir(PROJECT_ROOT)
 
     # 运行监控
     monitor = DependencyMonitor()
     report = monitor.run_monitor(
-        check_updates=args.check_updates,
-        security_scan=args.security_scan
+        check_updates=args.check_updates, security_scan=args.security_scan
     )
 
     # 保存报告
     if args.output:
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         print(f"\n📄 报告已保存到: {args.output}")
 
     # 返回适当的退出码
-    if report['summary']['security_issues'] > 0:
+    if report["summary"]["security_issues"] > 0:
         sys.exit(1)
-    elif report['summary']['outdated_packages'] > 5:
+    elif report["summary"]["outdated_packages"] > 5:
         sys.exit(2)
     else:
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

@@ -20,15 +20,18 @@ import yaml
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+
 class Colors:
     """终端颜色定义"""
-    RED = '\033[0;31m'
-    GREEN = '\033[0;32m'
-    YELLOW = '\033[1;33m'
-    BLUE = '\033[0;34m'
-    PURPLE = '\033[0;35m'
-    CYAN = '\033[0;36m'
-    NC = '\033[0m'  # No Color
+
+    RED = "\033[0;31m"
+    GREEN = "\033[0;32m"
+    YELLOW = "\033[1;33m"
+    BLUE = "\033[0;34m"
+    PURPLE = "\033[0;35m"
+    CYAN = "\033[0;36m"
+    NC = "\033[0m"  # No Color
+
 
 class HealthChecker:
     """环境健康检查器"""
@@ -59,10 +62,14 @@ class HealthChecker:
         print(f"{Colors.RED}[❌]{Colors.NC} {message}")
         self.issues.append(message)
 
-    def run_command(self, cmd: List[str], capture_output: bool = True) -> Optional[subprocess.CompletedProcess]:
+    def run_command(
+        self, cmd: List[str], capture_output: bool = True
+    ) -> Optional[subprocess.CompletedProcess]:
         """运行命令并返回结果"""
         try:
-            result = subprocess.run(cmd, capture_output=capture_output, text=True, check=False)
+            result = subprocess.run(
+                cmd, capture_output=capture_output, text=True, check=False
+            )
             return result
         except Exception as e:
             if self.verbose:
@@ -110,9 +117,9 @@ class HealthChecker:
                 self.log_error("bluev-dev 环境不存在")
                 if self.fix_issues:
                     self.log_info("尝试创建 bluev-dev 环境...")
-                    create_result = self.run_command([
-                        "conda", "create", "-n", "bluev-dev", "python=3.12.11", "-y"
-                    ])
+                    create_result = self.run_command(
+                        ["conda", "create", "-n", "bluev-dev", "python=3.12.11", "-y"]
+                    )
                     if create_result and create_result.returncode == 0:
                         self.log_success("bluev-dev 环境创建成功")
                         return True
@@ -127,12 +134,21 @@ class HealthChecker:
 
         # 核心依赖列表
         core_deps = [
-            'PySide6', 'cv2', 'numpy', 'PIL', 'pyautogui', 'pynput',
-            'sqlalchemy', 'pydantic', 'dotenv', 'loguru', 'click'
+            "PySide6",
+            "cv2",
+            "numpy",
+            "PIL",
+            "pyautogui",
+            "pynput",
+            "sqlalchemy",
+            "pydantic",
+            "dotenv",
+            "loguru",
+            "click",
         ]
 
         # 开发依赖列表
-        dev_deps = ['pytest', 'ruff', 'mypy', 'mkdocs', 'pre_commit']
+        dev_deps = ["pytest", "ruff", "mypy", "mkdocs", "pre_commit"]
 
         # 检查核心依赖
         for dep in core_deps:
@@ -151,13 +167,13 @@ class HealthChecker:
     def check_package(self, package_name: str) -> bool:
         """检查单个包是否可用"""
         try:
-            if package_name == 'cv2':
+            if package_name == "cv2":
                 import cv2  # noqa: F401
-            elif package_name == 'PIL':
+            elif package_name == "PIL":
                 from PIL import Image  # noqa: F401
-            elif package_name == 'dotenv':
+            elif package_name == "dotenv":
                 from dotenv import load_dotenv  # noqa: F401
-            elif package_name == 'pre_commit':
+            elif package_name == "pre_commit":
                 import pre_commit  # noqa: F401
             else:
                 importlib.import_module(package_name)
@@ -175,16 +191,10 @@ class HealthChecker:
             "environment.yml",
             "mkdocs.yml",
             ".pre-commit-config.yaml",
-            "pyproject.toml"
+            "pyproject.toml",
         ]
 
-        required_dirs = [
-            "bluev/",
-            "tests/",
-            "docs/",
-            "scripts/",
-            ".github/workflows/"
-        ]
+        required_dirs = ["bluev/", "tests/", "docs/", "scripts/", ".github/workflows/"]
 
         # 检查必需文件
         for file_path in required_files:
@@ -212,9 +222,9 @@ class HealthChecker:
             self.log_warning("Pre-commit hooks 未安装")
             if self.fix_issues:
                 self.log_info("尝试安装 pre-commit hooks...")
-                install_result = self.run_command([
-                    "conda", "run", "-n", "bluev-dev", "pre-commit", "install"
-                ])
+                install_result = self.run_command(
+                    ["conda", "run", "-n", "bluev-dev", "pre-commit", "install"]
+                )
                 if install_result and install_result.returncode == 0:
                     self.log_success("Pre-commit hooks 安装成功")
 
@@ -233,26 +243,31 @@ class HealthChecker:
         ci_file = PROJECT_ROOT / ".github" / "workflows" / "ci.yml"
         if ci_file.exists():
             try:
-                with open(ci_file, encoding='utf-8') as f:
+                with open(ci_file, encoding="utf-8") as f:
                     ci_config = yaml.safe_load(f)
 
                 # 检查 Python 版本
-                python_version = ci_config.get('env', {}).get('PYTHON_VERSION')
+                python_version = ci_config.get("env", {}).get("PYTHON_VERSION")
                 if python_version:
                     self.log_success(f"CI Python 版本: {python_version}")
                 else:
                     self.log_warning("CI 配置中未找到 Python 版本")
 
                 # 检查作业平台
-                jobs = ci_config.get('jobs', {})
-                windows_jobs = sum(1 for job in jobs.values()
-                                 if job.get('runs-on') == 'windows-latest')
+                jobs = ci_config.get("jobs", {})
+                windows_jobs = sum(
+                    1 for job in jobs.values() if job.get("runs-on") == "windows-latest"
+                )
                 total_jobs = len(jobs)
 
                 if windows_jobs == total_jobs and total_jobs > 0:
-                    self.log_success(f"所有 CI 作业使用 Windows: {windows_jobs}/{total_jobs}")
+                    self.log_success(
+                        f"所有 CI 作业使用 Windows: {windows_jobs}/{total_jobs}"
+                    )
                 else:
-                    self.log_warning(f"部分 CI 作业未使用 Windows: {windows_jobs}/{total_jobs}")
+                    self.log_warning(
+                        f"部分 CI 作业未使用 Windows: {windows_jobs}/{total_jobs}"
+                    )
 
             except Exception as e:
                 self.log_error(f"CI 配置文件解析失败: {e}")
@@ -264,7 +279,9 @@ class HealthChecker:
         from datetime import datetime
 
         total_checks = len(self.successes) + len(self.warnings) + len(self.issues)
-        success_rate = len(self.successes) / total_checks * 100 if total_checks > 0 else 0
+        success_rate = (
+            len(self.successes) / total_checks * 100 if total_checks > 0 else 0
+        )
 
         report = {
             "timestamp": datetime.now().isoformat(),
@@ -276,8 +293,8 @@ class HealthChecker:
             "details": {
                 "successes": self.successes,
                 "warnings": self.warnings,
-                "issues": self.issues
-            }
+                "issues": self.issues,
+            },
         }
 
         return report
@@ -313,16 +330,17 @@ class HealthChecker:
         print(f"成功率: {report['success_rate']}%")
 
         # 健康等级评估
-        if report['success_rate'] >= 90:
+        if report["success_rate"] >= 90:
             print(f"{Colors.GREEN}🎉 环境健康状态: 优秀{Colors.NC}")
-        elif report['success_rate'] >= 75:
+        elif report["success_rate"] >= 75:
             print(f"{Colors.YELLOW}⚠️ 环境健康状态: 良好{Colors.NC}")
-        elif report['success_rate'] >= 60:
+        elif report["success_rate"] >= 60:
             print(f"{Colors.YELLOW}⚠️ 环境健康状态: 一般{Colors.NC}")
         else:
             print(f"{Colors.RED}❌ 环境健康状态: 需要修复{Colors.NC}")
 
         return report
+
 
 def main():
     """主函数"""
@@ -337,6 +355,7 @@ def main():
 
     # 切换到项目根目录
     import os
+
     os.chdir(PROJECT_ROOT)
 
     # 运行健康检查
@@ -345,17 +364,18 @@ def main():
 
     # 保存报告
     if args.output:
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         print(f"\n📄 报告已保存到: {args.output}")
 
     # 返回适当的退出码
-    if report['issues'] > 0:
+    if report["issues"] > 0:
         sys.exit(1)
-    elif report['warnings'] > 0:
+    elif report["warnings"] > 0:
         sys.exit(2)
     else:
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
