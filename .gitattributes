@@ -1,18 +1,25 @@
-# Windows-specific line ending configuration
-# Set default behavior to automatically normalize line endings
-* text=auto
+# Windows 专用项目配置
+# 保持 Windows 原生换行符，避免 CRLF/LF 转换警告
+* text=auto eol=crlf
 
-# Force specific files to use LF (for cross-platform compatibility)
-*.py text eol=lf
-*.yml text eol=lf
-*.yaml text eol=lf
-*.md text eol=lf
-*.json text eol=lf
-*.toml text eol=lf
+# Python 文件使用 Windows 换行符（避免 Git 警告）
+*.py text eol=crlf
+*.pyi text eol=crlf
 
-# Force batch files to use CRLF (Windows requirement)
+# 配置文件使用 Windows 换行符
+*.yml text eol=crlf
+*.yaml text eol=crlf
+*.md text eol=crlf
+*.json text eol=crlf
+*.toml text eol=crlf
+*.txt text eol=crlf
+*.cfg text eol=crlf
+*.ini text eol=crlf
+
+# Windows 脚本文件
 *.bat text eol=crlf
 *.cmd text eol=crlf
+*.ps1 text eol=crlf
 
 # Binary files
 *.png binary
@@ -25,21 +32,22 @@
 *.so binary
 *.dylib binary
 
-# Documentation and config files
-README* text eol=lf
-LICENSE* text eol=lf
-CHANGELOG* text eol=lf
-.gitignore text eol=lf
-.gitattributes text eol=lf
+# 文档和配置文件使用 Windows 换行符
+README* text eol=crlf
+LICENSE* text eol=crlf
+CHANGELOG* text eol=crlf
+.gitignore text eol=crlf
+.gitattributes text eol=crlf
 
-# Python specific
-requirements*.txt text eol=lf
-setup.py text eol=lf
-setup.cfg text eol=lf
-pyproject.toml text eol=lf
-tox.ini text eol=lf
-.pre-commit-config.yaml text eol=lf
+# Python 项目文件使用 Windows 换行符
+requirements*.txt text eol=crlf
+setup.py text eol=crlf
+setup.cfg text eol=crlf
+pyproject.toml text eol=crlf
+tox.ini text eol=crlf
+.pre-commit-config.yaml text eol=crlf
+environment.yml text eol=crlf
 
-# GitHub workflows
+# GitHub workflows（保持 LF，因为在 Linux 环境运行）
 .github/workflows/*.yml text eol=lf
 .github/workflows/*.yaml text eol=lf

@@ -7,9 +7,12 @@ BlueV 装饰器模块
 
 import functools
 import time
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, TypeVar, Union
 
 from bluev.utils.logging import get_logger
+
+# 定义类型变量
+F = TypeVar('F', bound=Callable[..., Any])
 
 
 def retry(
@@ -17,7 +20,7 @@ def retry(
     delay: float = 1.0,
     backoff: float = 2.0,
     exceptions: tuple = (Exception,),
-) -> Callable[[Callable], Callable]:
+) -> Callable[[F], F]:
     """重试装饰器
 
     Args:
@@ -27,7 +30,7 @@ def retry(
         exceptions: 需要重试的异常类型
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             logger = get_logger(f"{func.__module__}.{func.__name__}")
@@ -55,19 +58,19 @@ def retry(
 
             return None  # 不应该到达这里
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
 
 
-def timeout(seconds: float) -> Callable[[Callable], Callable]:
+def timeout(seconds: float) -> Callable[[F], F]:
     """超时装饰器
 
     Args:
         seconds: 超时时间（秒）
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             import signal
@@ -86,19 +89,19 @@ def timeout(seconds: float) -> Callable[[Callable], Callable]:
             finally:
                 signal.signal(signal.SIGALRM, old_handler)
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
 
 
-def validate_types(**type_hints: Any) -> Callable[[Callable], Callable]:
+def validate_types(**type_hints: Any) -> Callable[[F], F]:
     """类型验证装饰器
 
     Args:
         **type_hints: 参数名和对应的类型
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             # 获取函数签名
@@ -120,19 +123,19 @@ def validate_types(**type_hints: Any) -> Callable[[Callable], Callable]:
 
             return func(*args, **kwargs)
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
 
 
-def cache_result(ttl: Optional[float] = None) -> Callable[[Callable], Callable]:
+def cache_result(ttl: Optional[float] = None) -> Callable[[F], F]:
     """结果缓存装饰器
 
     Args:
         ttl: 缓存生存时间（秒），None 表示永久缓存
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: F) -> F:
         cache: Dict[str, Dict[str, Any]] = {}
 
         @functools.wraps(func)
@@ -164,12 +167,12 @@ def cache_result(ttl: Optional[float] = None) -> Callable[[Callable], Callable]:
             "cache_keys": list(cache.keys()),
         }
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
 
 
-def singleton(cls: type) -> Callable:
+def singleton(cls: type) -> type:
     """单例装饰器"""
     instances = {}
 
@@ -179,17 +182,17 @@ def singleton(cls: type) -> Callable:
             instances[cls] = cls(*args, **kwargs)
         return instances[cls]
 
-    return get_instance
+    return get_instance  # type: ignore
 
 
-def deprecated(reason: str = "") -> Callable[[Callable], Callable]:
+def deprecated(reason: str = "") -> Callable[[F], F]:
     """废弃警告装饰器
 
     Args:
         reason: 废弃原因
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             import warnings
@@ -205,14 +208,14 @@ def deprecated(reason: str = "") -> Callable[[Callable], Callable]:
 
             return func(*args, **kwargs)
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
 
 
 def safe_call(
     default_return: Any = None, log_errors: bool = True
-) -> Callable[[Callable], Callable]:
+) -> Callable[[F], F]:
     """安全调用装饰器，捕获异常并返回默认值
 
     Args:
@@ -220,7 +223,7 @@ def safe_call(
         log_errors: 是否记录错误日志
     """
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
@@ -236,6 +239,6 @@ def safe_call(
                     )
                 return default_return
 
-        return wrapper
+        return wrapper  # type: ignore
 
     return decorator
