@@ -175,112 +175,148 @@ class ClickNode(BaseNode):
         start_time = time.time()
 
         try:
-            # 获取输入参数
-            location = self.inputs.get("location")
-            button = self.inputs.get("button", "left").lower()
-            clicks = self.inputs.get("clicks", 1)
-            interval = self.inputs.get("interval", 0.1)
-            duration = self.inputs.get("duration", 0.0)
-            before_delay = self.inputs.get("before_delay", 0.0)
-
-            # 参数验证
-            if location is None or len(location) != 2:
-                raise ValueError("位置参数必须是包含两个数字的坐标元组")
-
-            x, y = int(location[0]), int(location[1])
-
-            if not self._validate_location(x, y):
-                raise ValueError(
-                    f"点击位置 ({x}, {y}) 超出屏幕范围 ({self.screen_width}x{self.screen_height})"
-                )
-
-            if button not in self.MOUSE_BUTTONS:
-                self.logger.warning(f"未知的鼠标按键 '{button}'，使用默认按键 'left'")
-                button = "left"
-
-            # 转换按键名称
-            button = self.MOUSE_BUTTONS[button]
-
-            if clicks <= 0:
-                raise ValueError
-
-            if interval < 0:
-                raise ValueError
-
-            if duration < 0:
-                raise ValueError
+            # 获取并验证输入参数
+            params = self._get_and_validate_params()
 
             # 执行点击前延迟
-            if before_delay > 0:
-                self.logger.debug(f"点击前延迟 {before_delay} 秒")
-                time.sleep(before_delay)
-
-            self.logger.info(f"执行点击: 位置=({x}, {y}), 按键={button}, 次数={clicks}")
+            self._execute_before_delay(params["before_delay"])
 
             # 执行点击操作
-            actual_clicks = 0
+            actual_clicks = self._perform_clicks(params)
 
-            for i in range(clicks):
-                try:
-                    if duration > 0:
-                        # 按住点击（通过适配层）
-                        adapter = get_system_adapter()
-                        adapter.click(x, y, button=button)
-                        time.sleep(duration)
-                        adapter.click(x, y, button=button)
-                    else:
-                        # 普通点击（通过适配层）
-                        adapter = get_system_adapter()
-                        adapter.click(x, y, button=button)
-
-                    actual_clicks += 1
-                    self.logger.debug(f"完成第 {i + 1} 次点击")
-
-                    # 多次点击间的间隔
-                    if i < clicks - 1 and interval > 0:
-                        time.sleep(interval)
-
-                except Exception as e:
-                    if "FailSafe" in str(e):
-                        self.logger.warning("触发 PyAutoGUI 安全机制，停止点击")
-                    else:
-                        self.logger.error(f"第 {i + 1} 次点击失败: {e}")
-                    break
-
-            # 计算执行时间
-            execution_time = time.time() - start_time
-
-            # 判断是否成功
-            success = actual_clicks > 0
-            error_message = None if success else "所有点击都失败了"
-
-            # 返回结果
-            result = {
-                "success": success,
-                "actual_clicks": actual_clicks,
-                "click_location": (x, y),
-                "execution_time": execution_time,
-                "error_message": error_message,
-            }
-
-            if success:
-                self.logger.info(
-                    f"点击完成: {actual_clicks}/{clicks} 次成功, 耗时 {execution_time:.3f}秒"
-                )
-            else:
-                self.logger.error(f"点击失败: 耗时 {execution_time:.3f}秒")
-
-            return result
+            # 生成并返回结果
+            return self._generate_result(params, actual_clicks, start_time)
 
         except Exception as e:
-            execution_time = time.time() - start_time
-            self.logger.error(f"点击执行失败: {e}")
+            return self._generate_error_result(e, start_time)
 
-            # 返回失败结果
-            return {
-                "success": False,
-                "actual_clicks": 0,
-                "click_location": (0, 0),
-                "execution_time": execution_time,
-                "error_message": str(e),
-            }
+    def _get_and_validate_params(self) -> Dict[str, Any]:
+        """获取并验证输入参数"""
+        # 获取输入参数
+        location = self.inputs.get("location")
+        button = self.inputs.get("button", "left").lower()
+        clicks = self.inputs.get("clicks", 1)
+        interval = self.inputs.get("interval", 0.1)
+        duration = self.inputs.get("duration", 0.0)
+        before_delay = self.inputs.get("before_delay", 0.0)
+
+        # 参数验证
+        if location is None or len(location) != 2:
+            raise ValueError("位置参数必须是包含两个数字的坐标元组")
+
+        x, y = int(location[0]), int(location[1])
+
+        if not self._validate_location(x, y):
+            raise ValueError(
+                f"点击位置 ({x}, {y}) 超出屏幕范围 ({self.screen_width}x{self.screen_height})"
+            )
+
+        if button not in self.MOUSE_BUTTONS:
+            self.logger.warning(f"未知的鼠标按键 '{button}'，使用默认按键 'left'")
+            button = "left"
+
+        # 转换按键名称
+        button = self.MOUSE_BUTTONS[button]
+
+        if clicks <= 0:
+            raise ValueError("点击次数必须大于0")
+
+        if interval < 0:
+            raise ValueError("点击间隔不能为负数")
+
+        if duration < 0:
+            raise ValueError("点击持续时间不能为负数")
+
+        return {
+            "x": x,
+            "y": y,
+            "button": button,
+            "clicks": clicks,
+            "interval": interval,
+            "duration": duration,
+            "before_delay": before_delay,
+        }
+
+    def _execute_before_delay(self, before_delay: float) -> None:
+        """执行点击前延迟"""
+        if before_delay > 0:
+            self.logger.debug(f"点击前延迟 {before_delay} 秒")
+            time.sleep(before_delay)
+
+    def _perform_clicks(self, params: Dict[str, Any]) -> int:
+        """执行点击操作"""
+        x, y = params["x"], params["y"]
+        button = params["button"]
+        clicks = params["clicks"]
+        interval = params["interval"]
+        duration = params["duration"]
+
+        self.logger.info(f"执行点击: 位置=({x}, {y}), 按键={button}, 次数={clicks}")
+
+        actual_clicks = 0
+        for i in range(clicks):
+            try:
+                self._perform_single_click(x, y, button, duration)
+                actual_clicks += 1
+                self.logger.debug(f"完成第 {i + 1} 次点击")
+
+                # 多次点击间的间隔
+                if i < clicks - 1 and interval > 0:
+                    time.sleep(interval)
+
+            except Exception as e:
+                if "FailSafe" in str(e):
+                    self.logger.warning("触发 PyAutoGUI 安全机制，停止点击")
+                else:
+                    self.logger.error(f"第 {i + 1} 次点击失败: {e}")
+                break
+
+        return actual_clicks
+
+    def _perform_single_click(self, x: int, y: int, button: str, duration: float) -> None:
+        """执行单次点击"""
+        adapter = get_system_adapter()
+        if duration > 0:
+            # 按住点击
+            adapter.click(x, y, button=button)
+            time.sleep(duration)
+            adapter.click(x, y, button=button)
+        else:
+            # 普通点击
+            adapter.click(x, y, button=button)
+
+    def _generate_result(self, params: Dict[str, Any], actual_clicks: int, start_time: float) -> Dict[str, Any]:
+        """生成执行结果"""
+        execution_time = time.time() - start_time
+        success = actual_clicks > 0
+        error_message = None if success else "所有点击都失败了"
+
+        result = {
+            "success": success,
+            "actual_clicks": actual_clicks,
+            "click_location": (params["x"], params["y"]),
+            "execution_time": execution_time,
+            "error_message": error_message,
+        }
+
+        if success:
+            self.logger.info(
+                f"点击完成: {actual_clicks}/{params['clicks']} 次成功, 耗时 {execution_time:.3f}秒"
+            )
+        else:
+            self.logger.error(f"点击失败: 耗时 {execution_time:.3f}秒")
+
+        return result
+
+    def _generate_error_result(self, error: Exception, start_time: float) -> Dict[str, Any]:
+        """生成错误结果"""
+        execution_time = time.time() - start_time
+        self.logger.error(f"点击执行失败: {error}")
+
+        return {
+            "success": False,
+            "actual_clicks": 0,
+            "click_location": (0, 0),
+            "execution_time": execution_time,
+            "error_message": str(error),
+        }

@@ -42,10 +42,25 @@ class NodeInput:
 
     def validate(self, value: Any) -> bool:
         """验证输入值是否符合要求"""
-        # 检查必需参数
-        if self.required and value is None:
+        if not self._validate_required(value):
             return False
 
+        if not self._validate_data_type(value):
+            return False
+
+        if not self._validate_rules(value):
+            return False
+
+        return True
+
+    def _validate_required(self, value: Any) -> bool:
+        """验证必需参数"""
+        if self.required and value is None:
+            return False
+        return True
+
+    def _validate_data_type(self, value: Any) -> bool:
+        """验证数据类型"""
         # 如果值为 None 且不是必需的，则通过验证
         if value is None and not self.required:
             return True
@@ -58,25 +73,39 @@ class NodeInput:
                 return True
             except (ValueError, TypeError):
                 return False
+        return True
 
-        # 应用验证规则
-        if self.validation_rules:
-            # 数值范围验证
-            if "min_value" in self.validation_rules:
-                if value < self.validation_rules["min_value"]:
-                    return False
-            if "max_value" in self.validation_rules:
-                if value > self.validation_rules["max_value"]:
-                    return False
+    def _validate_rules(self, value: Any) -> bool:
+        """验证规则"""
+        if not self.validation_rules:
+            return True
 
-            # 字符串长度验证
-            if "min_length" in self.validation_rules:
-                if len(str(value)) < self.validation_rules["min_length"]:
-                    return False
-            if "max_length" in self.validation_rules:
-                if len(str(value)) > self.validation_rules["max_length"]:
-                    return False
+        if not self._validate_numeric_range(value):
+            return False
 
+        if not self._validate_string_length(value):
+            return False
+
+        return True
+
+    def _validate_numeric_range(self, value: Any) -> bool:
+        """验证数值范围"""
+        if "min_value" in self.validation_rules:
+            if value < self.validation_rules["min_value"]:
+                return False
+        if "max_value" in self.validation_rules:
+            if value > self.validation_rules["max_value"]:
+                return False
+        return True
+
+    def _validate_string_length(self, value: Any) -> bool:
+        """验证字符串长度"""
+        if "min_length" in self.validation_rules:
+            if len(str(value)) < self.validation_rules["min_length"]:
+                return False
+        if "max_length" in self.validation_rules:
+            if len(str(value)) > self.validation_rules["max_length"]:
+                return False
         return True
 
 
