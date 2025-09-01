@@ -18,7 +18,6 @@ project_root = Path(__file__).parent.parent
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QMessageBox
 
@@ -31,7 +30,7 @@ from bluev.utils.logging import get_logger, setup_logging
 class BlueVApplication:
     """BlueV 应用程序主类"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.app: Optional[QApplication] = None
         self.main_window: Optional[MainWindow] = None
         self.config = Config()
@@ -40,9 +39,9 @@ class BlueVApplication:
 
     def setup_application(self) -> QApplication:
         """设置 Qt 应用程序"""
-        # 设置应用程序属性
-        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-        QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+        # 设置应用程序属性 (PySide6 中这些属性可能不需要或已自动启用)
+        # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)  # PySide6 中已默认启用
+        # QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)     # PySide6 中已默认启用
 
         # 创建应用程序实例
         app = QApplication(sys.argv)
@@ -60,7 +59,7 @@ class BlueVApplication:
 
         return app
 
-    def setup_directories(self):
+    def setup_directories(self) -> None:
         """创建必要的目录"""
         directories = [
             self.config.DATA_DIR,
@@ -73,10 +72,10 @@ class BlueVApplication:
         for directory in directories:
             directory.mkdir(parents=True, exist_ok=True)
 
-    def setup_signal_handlers(self):
+    def setup_signal_handlers(self) -> None:
         """设置信号处理器"""
 
-        def signal_handler(signum, frame):
+        def signal_handler(signum: int, frame: Optional[object]) -> None:
             self.logger.info(f"接收到信号 {signum}，准备关闭应用程序")
             self._shutdown_requested = True
             if self.app:
@@ -86,10 +85,12 @@ class BlueVApplication:
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
 
-    def setup_exception_handler(self):
+    def setup_exception_handler(self) -> None:
         """设置全局异常处理器"""
 
-        def handle_exception(exc_type, exc_value, exc_traceback):
+        def handle_exception(
+            exc_type: type, exc_value: Exception, exc_traceback: Optional[object]
+        ) -> None:
             if issubclass(exc_type, KeyboardInterrupt):
                 # 允许 KeyboardInterrupt 正常处理
                 sys.__excepthook__(exc_type, exc_value, exc_traceback)
@@ -155,7 +156,7 @@ class BlueVApplication:
                 traceback.print_exc()
             return 1
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """清理资源"""
         if self.logger:
             self.logger.info("开始清理应用程序资源")

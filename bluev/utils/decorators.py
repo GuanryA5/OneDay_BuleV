@@ -17,7 +17,7 @@ def retry(
     delay: float = 1.0,
     backoff: float = 2.0,
     exceptions: tuple = (Exception,),
-):
+) -> Callable[[Callable], Callable]:
     """重试装饰器
 
     Args:
@@ -29,7 +29,7 @@ def retry(
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             logger = get_logger(f"{func.__module__}.{func.__name__}")
 
             for attempt in range(max_attempts):
@@ -60,7 +60,7 @@ def retry(
     return decorator
 
 
-def timeout(seconds: float):
+def timeout(seconds: float) -> Callable[[Callable], Callable]:
     """超时装饰器
 
     Args:
@@ -69,10 +69,10 @@ def timeout(seconds: float):
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             import signal
 
-            def timeout_handler(signum, frame):
+            def timeout_handler(signum: int, frame: Any) -> None:
                 raise TimeoutError(f"函数 {func.__name__} 执行超时 ({seconds}秒)")
 
             # 设置信号处理器
@@ -91,7 +91,7 @@ def timeout(seconds: float):
     return decorator
 
 
-def validate_types(**type_hints):
+def validate_types(**type_hints: Any) -> Callable[[Callable], Callable]:
     """类型验证装饰器
 
     Args:
@@ -100,7 +100,7 @@ def validate_types(**type_hints):
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # 获取函数签名
             import inspect
 
@@ -125,7 +125,7 @@ def validate_types(**type_hints):
     return decorator
 
 
-def cache_result(ttl: Optional[float] = None):
+def cache_result(ttl: Optional[float] = None) -> Callable[[Callable], Callable]:
     """结果缓存装饰器
 
     Args:
@@ -136,7 +136,7 @@ def cache_result(ttl: Optional[float] = None):
         cache: Dict[str, Dict[str, Any]] = {}
 
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # 生成缓存键
             cache_key = str(hash((args, tuple(sorted(kwargs.items())))))
 
@@ -169,12 +169,12 @@ def cache_result(ttl: Optional[float] = None):
     return decorator
 
 
-def singleton(cls):
+def singleton(cls: type) -> Callable:
     """单例装饰器"""
     instances = {}
 
     @functools.wraps(cls)
-    def get_instance(*args, **kwargs):
+    def get_instance(*args: Any, **kwargs: Any) -> Any:
         if cls not in instances:
             instances[cls] = cls(*args, **kwargs)
         return instances[cls]
@@ -182,7 +182,7 @@ def singleton(cls):
     return get_instance
 
 
-def deprecated(reason: str = ""):
+def deprecated(reason: str = "") -> Callable[[Callable], Callable]:
     """废弃警告装饰器
 
     Args:
@@ -191,7 +191,7 @@ def deprecated(reason: str = ""):
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             import warnings
 
             message = f"函数 {func.__name__} 已废弃"
@@ -210,7 +210,9 @@ def deprecated(reason: str = ""):
     return decorator
 
 
-def safe_call(default_return: Any = None, log_errors: bool = True):
+def safe_call(
+    default_return: Any = None, log_errors: bool = True
+) -> Callable[[Callable], Callable]:
     """安全调用装饰器，捕获异常并返回默认值
 
     Args:
@@ -220,7 +222,7 @@ def safe_call(default_return: Any = None, log_errors: bool = True):
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             try:
                 return func(*args, **kwargs)
             except Exception as e:

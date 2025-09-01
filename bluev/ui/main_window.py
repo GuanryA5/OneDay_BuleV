@@ -6,8 +6,10 @@ BlueV 主窗口
 负责整个应用程序的布局和基本交互。
 """
 
+from typing import Optional
+
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction
+from PySide6.QtGui import QAction, QCloseEvent
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -24,7 +26,7 @@ from bluev.utils.logging import get_logger
 class MainWindow(QMainWindow):
     """BlueV 主窗口类"""
 
-    def __init__(self, config: Config, parent=None):
+    def __init__(self, config: Config, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self.config = config
         self.logger = get_logger(__name__)
@@ -36,7 +38,7 @@ class MainWindow(QMainWindow):
 
         self.logger.info("主窗口初始化完成")
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         """设置用户界面"""
         # 设置窗口属性
         self.setWindowTitle(f"{self.config.APP_NAME} v{self.config.APP_VERSION}")
@@ -109,7 +111,7 @@ class MainWindow(QMainWindow):
 
         return panel
 
-    def setup_menu(self):
+    def setup_menu(self) -> None:
         """设置菜单栏"""
         menubar = self.menuBar()
 
@@ -171,7 +173,7 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
 
-    def setup_toolbar(self):
+    def setup_toolbar(self) -> None:
         """设置工具栏"""
         toolbar = self.addToolBar("主工具栏")
         toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
@@ -203,7 +205,7 @@ class MainWindow(QMainWindow):
         stop_action.triggered.connect(self.stop_workflow)
         toolbar.addAction(stop_action)
 
-    def setup_statusbar(self):
+    def setup_statusbar(self) -> None:
         """设置状态栏"""
         statusbar = self.statusBar()
 
@@ -216,42 +218,42 @@ class MainWindow(QMainWindow):
         statusbar.addPermanentWidget(version_label)
 
     # 菜单和工具栏事件处理方法
-    def new_workflow(self):
+    def new_workflow(self) -> None:
         """新建工作流"""
         self.logger.info("新建工作流")
         self.status_label.setText("新建工作流")
 
-    def open_workflow(self):
+    def open_workflow(self) -> None:
         """打开工作流"""
         self.logger.info("打开工作流")
         self.status_label.setText("打开工作流")
 
-    def save_workflow(self):
+    def save_workflow(self) -> None:
         """保存工作流"""
         self.logger.info("保存工作流")
         self.status_label.setText("保存工作流")
 
-    def undo(self):
+    def undo(self) -> None:
         """撤销操作"""
         self.logger.info("撤销操作")
         self.status_label.setText("撤销操作")
 
-    def redo(self):
+    def redo(self) -> None:
         """重做操作"""
         self.logger.info("重做操作")
         self.status_label.setText("重做操作")
 
-    def start_workflow(self):
+    def start_workflow(self) -> None:
         """开始执行工作流"""
         self.logger.info("开始执行工作流")
         self.status_label.setText("正在执行工作流...")
 
-    def stop_workflow(self):
+    def stop_workflow(self) -> None:
         """停止执行工作流"""
         self.logger.info("停止执行工作流")
         self.status_label.setText("工作流已停止")
 
-    def show_about(self):
+    def show_about(self) -> None:
         """显示关于对话框"""
         from PySide6.QtWidgets import QMessageBox
 
@@ -266,7 +268,7 @@ class MainWindow(QMainWindow):
             """,
         )
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent) -> None:
         """窗口关闭事件"""
         self.logger.info("主窗口关闭")
         event.accept()
