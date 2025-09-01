@@ -119,15 +119,19 @@ def run_basic_tests() -> Dict[str, bool]:
         dict2 = {"b": 2}
         merged = dict1 | dict2
         tests["dict_merge_operator"] = True
-    except:
+    except (TypeError, AttributeError):
         tests["dict_merge_operator"] = False
 
     # 测试类型提示
     try:
-        from typing import Annotated
+        import importlib.util
 
-        tests["annotated_types"] = True
-    except ImportError:
+        spec = importlib.util.find_spec("typing")
+        if spec and hasattr(spec.loader.load_module(spec), "Annotated"):
+            tests["annotated_types"] = True
+        else:
+            tests["annotated_types"] = False
+    except (ImportError, AttributeError):
         tests["annotated_types"] = False
 
     # 测试 f-string 调试 (Python 3.8+)
@@ -135,7 +139,7 @@ def run_basic_tests() -> Dict[str, bool]:
         value = 42
         debug_str = f"{value=}"
         tests["fstring_debug"] = True
-    except:
+    except (SyntaxError, NameError):
         tests["fstring_debug"] = False
 
     return tests
