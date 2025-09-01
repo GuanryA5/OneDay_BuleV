@@ -14,7 +14,6 @@ dependencies:
   - qt6-main
 
   # Computer Vision and Image Processing
-  - opencv
   - pillow
 
   # Scientific Computing
