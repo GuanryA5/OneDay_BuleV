@@ -30,6 +30,40 @@ class CICDHealthChecker:
         icon = "❌" if severity == "ERROR" else "⚠️"
         print(f"  {icon} [{category}] {message}")
 
+    def check_python_version(self) -> bool:
+        """检查 Python 版本一致性"""
+        print("🔍 检查 Python 版本一致性...")
+
+        local_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+        print(f"  本地 Python 版本: {local_version}")
+
+        ci_config_path = self.project_root / ".github" / "workflows" / "ci.yml"
+        if ci_config_path.exists():
+            try:
+                with open(ci_config_path, encoding="utf-8") as f:
+                    ci_config = yaml.safe_load(f)
+                    ci_version = ci_config.get("env", {}).get(
+                        "PYTHON_VERSION", "Unknown"
+                    )
+                    print(f"  CI Python 版本: {ci_version}")
+
+                    if local_version == ci_version:
+                        print("  ✅ Python 版本一致")
+                        return True
+                    else:
+                        self.log_issue(
+                            "Python 版本",
+                            f"本地版本 {local_version} 与 CI 版本 {ci_version} 不一致",
+                            "WARNING",
+                        )
+                        return False
+            except Exception as e:
+                self.log_issue("Python 版本", f"读取 CI 配置失败: {e}")
+                return False
+        else:
+            self.log_issue("Python 版本", "CI 配置文件不存在")
+            return False
+
     def check_github_workflows(self) -> bool:
         """检查 GitHub Actions 工作流配置"""
         print("🔍 检查 GitHub Actions 工作流...")

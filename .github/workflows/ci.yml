@@ -4,79 +4,276 @@ on:
   push:
     branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  # 与本地环境一致的配置
+  PYTHON_VERSION: '3.12.3'
+  CACHE_VERSION: 'v1'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, "3.10"]
+  # 快速检查 - 使用本地环境配置
+  quick-check:
+    name: Quick Check (Python ${{ env.PYTHON_VERSION }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/pip
-          ~/.cache/pypoetry
-        key: ${{ runner.os }}-python-${{ matrix.python-version }}-pip-${{ hashFiles('**/requirements*.txt', '**/pyproject.toml') }}
-        restore-keys: |
-          ${{ runner.os }}-python-${{ matrix.python-version }}-pip-
-          ${{ runner.os }}-python-
-          ${{ runner.os }}-
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-${{ hashFiles('**/pyproject.toml', '**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pip-
 
-    - name: Setup Windows environment
-      run: |
-        echo "Setting up Windows-specific environment"
-        echo "Python version: ${{ matrix.python-version }}"
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev \
+            libgl1-mesa-dev \
+            libopencv-dev \
+            python3-opencv \
+            libjpeg-dev \
+            libpng-dev \
+            libtiff-dev \
+            xvfb
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-dev.txt
-      continue-on-error: false
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
 
-    - name: Run Ruff linting
-      run: |
-        python -m ruff check . --output-format=github
-      continue-on-error: false
+      - name: Verify environment
+        run: |
+          echo "🔍 环境验证"
+          python --version
+          pip --version
+          python -c "import PySide6; print(f'PySide6: {PySide6.__version__}')"
+          python -c "import cv2; print(f'OpenCV: {cv2.__version__}')"
+          python -c "import numpy; print(f'NumPy: {numpy.__version__}')"
 
-    - name: Run Ruff formatting check
-      run: |
-        python -m ruff format --check .
-      continue-on-error: false
+      - name: Run Ruff linting
+        run: |
+          echo "🔍 代码检查 (Ruff)"
+          ruff check . --output-format=github
 
-    - name: Run tests
-      run: |
-        python -m pytest tests/ --cov=./bluev --cov-report=xml --cov-report=term-missing --tb=short -v
-      continue-on-error: false
+      - name: Run Ruff formatting check
+        run: |
+          echo "🔍 格式检查 (Ruff)"
+          ruff format --check .
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+  # 完整测试 - 包含 GUI 测试
+  full-test:
+    name: Full Test Suite
+    runs-on: ubuntu-24.04
+    needs: quick-check
+    timeout-minutes: 30
 
-  security:
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-${{ hashFiles('**/pyproject.toml', '**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev \
+            libgl1-mesa-dev \
+            libopencv-dev \
+            python3-opencv \
+            libjpeg-dev \
+            libpng-dev \
+            libtiff-dev \
+            xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xinerama0
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run tests with coverage
+        run: |
+          echo "🧪 运行测试套件"
+          # 设置虚拟显示器用于 GUI 测试
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          sleep 3
+
+          # 运行测试
+          pytest \
+            --cov=bluev \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-report=term-missing \
+            --junit-xml=pytest-results.xml \
+            -v
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        if: always()
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: |
+            pytest-results.xml
+            htmlcov/
+            coverage.xml
+
+  # 类型检查
+  type-check:
+    name: Type Check (mypy)
+    runs-on: ubuntu-24.04
+    needs: quick-check
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-${{ hashFiles('**/pyproject.toml', '**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ env.CACHE_VERSION }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run mypy type checking
+        run: |
+          echo "🔍 类型检查 (mypy)"
+          mypy bluev/ --show-error-codes --pretty
+
+  # 安全扫描
+  security-scan:
+    name: Security Scan
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+    timeout-minutes: 10
 
-    - name: Run Trufflehog filesystem scan
-      uses: trufflesecurity/trufflehog@main
-      with:
-        path: ./
-        extra_args: --only-verified --no-update
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install bandit
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit[toml]
+
+      - name: Run security scan
+        run: |
+          echo "🔒 安全扫描 (bandit)"
+          bandit -r bluev/ -f json -o bandit-report.json || true
+          bandit -r bluev/ -f txt
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: security-scan-results
+          path: bandit-report.json
+
+  # 兼容性测试 - 定期运行
+  compatibility-test:
+    name: Compatibility Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qt6-base-dev \
+            libgl1-mesa-dev \
+            libopencv-dev \
+            python3-opencv \
+            xvfb
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Run basic tests
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+          sleep 3
+          pytest tests/ -v --tb=short

@@ -13,6 +13,7 @@ __pycache__/
 .ruff_cache/
 memory-bank/
 script/
+.augment-guidelines
 # docs/ - Don't ignore docs directory, we need it for GitHub Pages
 
 # Distribution / packaging
@@ -145,7 +146,7 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-#/site
+# /site  # Temporarily allow site/ for GitHub Pages bootstrap
 
 # mypy
 .mypy_cache/
@@ -193,3 +194,7 @@ user_data/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+
+# venv packages
+bulev39/

@@ -1,5 +1,10 @@
 # BlueV 游戏自动化蓝图框架
 
+[![CI](https://github.com/rays/OneDay_BuleV/actions/workflows/ci.yml/badge.svg)](https://github.com/rays/OneDay_BuleV/actions/workflows/ci.yml)
+[![Documentation](https://github.com/rays/OneDay_BuleV/actions/workflows/docs.yml/badge.svg)](https://github.com/rays/OneDay_BuleV/actions/workflows/docs.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 一个基于 PySide6 的可视化游戏自动化工具，让用户通过拖拽节点的方式创建复杂的游戏自动化工作流程。
 
 ## 🎯 项目特色
@@ -13,8 +18,9 @@
 
 ### 环境要求
 
-- Python 3.8 或更高版本
-- Windows 10/11 (主要支持平台)
+- Python 3.9 或更高版本
+- 支持平台: Windows 10/11, Linux (Ubuntu 20.04+), macOS 10.15+
+- 推荐开发环境: WSL2 Ubuntu 24.04
 
 ### 安装步骤
 
