@@ -30,10 +30,12 @@ def _ensure_utf8_console_sink() -> None:
 
     try:
         logger.remove()
-    except Exception:
+    except Exception as e:
         # 忽略移除默认处理器时的异常，这是正常的
-        # 这里不需要记录日志，因为这是预期的行为
-        pass  # noqa: S110
+        # 记录调试信息以便排查问题
+        import sys
+
+        print(f"Debug: 移除默认日志处理器时的预期异常: {e}", file=sys.stderr)
 
     # 包装 stdout，强制使用 UTF-8 编码
     stream = sys.stdout
@@ -68,7 +70,7 @@ def setup_logging(config: Config) -> None:
     logger.remove()
 
     # 确保日志目录存在
-    getattr(config, "LOGS_DIR", "Unknown").mkdir(parents=True, exist_ok=True)
+    config.LOGS_DIR.mkdir(parents=True, exist_ok=True)
 
     # 控制台日志配置（UTF-8）
     console_format = (
@@ -100,15 +102,15 @@ def setup_logging(config: Config) -> None:
     logger.add(
         stream,
         format=console_format,
-        level=getattr(config, "LOG_LEVEL", "Unknown"),
+        level=config.LOG_LEVEL,
         colorize=True,
-        backtrace=getattr(config, "DEBUG", "Unknown"),
-        diagnose=getattr(config, "DEBUG", "Unknown"),
+        backtrace=config.DEBUG,
+        diagnose=config.DEBUG,
     )
 
     # 添加文件日志处理器 - 普通日志
     logger.add(
-        getattr(config, "LOGS_DIR", "Unknown") / "bluev.log",
+        config.LOGS_DIR / "bluev.log",
         format=file_format,
         level="DEBUG",
         rotation="10 MB",
@@ -121,7 +123,7 @@ def setup_logging(config: Config) -> None:
 
     # 添加文件日志处理器 - 错误日志
     logger.add(
-        getattr(config, "LOGS_DIR", "Unknown") / "bluev_error.log",
+        config.LOGS_DIR / "bluev_error.log",
         format=file_format,
         level="ERROR",
         rotation="5 MB",

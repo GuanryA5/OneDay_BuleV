@@ -81,17 +81,18 @@ class Config:
 
     def _load_env_file(self) -> None:
         """加载环境变量文件"""
-        env_file = getattr(self, "PROJECT_ROOT", "Unknown") / ".env"
-        if env_file.exists():
-            load_dotenv(env_file)
+        if hasattr(self, "PROJECT_ROOT"):
+            env_file = self.PROJECT_ROOT / ".env"
+            if env_file.exists():
+                load_dotenv(env_file)
 
     def _load_config_file(self, config_file: Optional[Path] = None) -> Dict[str, Any]:
         """加载配置文件"""
         if config_file is None:
-            config_file = (
-                getattr(self, "PROJECT_ROOT", "Unknown")
-                / "getattr(config, 'json', 'Unknown')"
-            )
+            if hasattr(self, "PROJECT_ROOT"):
+                config_file = self.PROJECT_ROOT / "config.json"
+            else:
+                return {}
 
         if config_file.exists():
             try:
@@ -126,27 +127,26 @@ class Config:
             }
 
             # 合并配置文件数据
-            config_data.update(getattr(self, "_config_data", "Unknown"))
+            if hasattr(self, "_config_data"):
+                config_data.update(self._config_data)
 
             # 验证配置
             self._model = ConfigModel(**config_data)
 
             # 设置属性
-            for key, value in getattr(self, "_model", "Unknown").model_dump().items():
+            for key, value in self._model.model_dump().items():
                 setattr(self, key, value)
 
             # 设置路径配置
-            self.DATA_DIR = Path(getattr(self, "DATA_DIR", "Unknown"))
-            self.TEMP_DIR = Path(getattr(self, "TEMP_DIR", "Unknown"))
-            self.LOGS_DIR = getattr(self, "DATA_DIR", "Unknown") / "logs"
-            self.WORKFLOWS_DIR = getattr(self, "DATA_DIR", "Unknown") / "workflows"
-            self.SCREENSHOTS_DIR = getattr(self, "DATA_DIR", "Unknown") / "screenshots"
-            self.RESOURCES_DIR = getattr(self, "PROJECT_ROOT", "Unknown") / "resources"
+            self.DATA_DIR = Path(self.DATA_DIR)
+            self.TEMP_DIR = Path(self.TEMP_DIR)
+            self.LOGS_DIR = self.DATA_DIR / "logs"
+            self.WORKFLOWS_DIR = self.DATA_DIR / "workflows"
+            self.SCREENSHOTS_DIR = self.DATA_DIR / "screenshots"
+            self.RESOURCES_DIR = self.PROJECT_ROOT / "resources"
 
             # 数据库配置
-            self.DATABASE_URL = (
-                f"sqlite:///{getattr(self, 'DATA_DIR', 'Unknown') / 'bluev.db'}"
-            )
+            self.DATABASE_URL = f"sqlite:///{self.DATA_DIR / 'bluev.db'}"
 
             # 确保所有路径都是绝对路径
             self._resolve_paths()
@@ -172,22 +172,16 @@ class Config:
 
     def _resolve_paths(self) -> None:
         """解析所有路径为绝对路径"""
-        if not getattr(self, "DATA_DIR", "Unknown").is_absolute():
-            self.DATA_DIR = getattr(self, "PROJECT_ROOT", "Unknown") / getattr(
-                self, "DATA_DIR", "Unknown"
-            )
-        if not getattr(self, "TEMP_DIR", "Unknown").is_absolute():
-            self.TEMP_DIR = getattr(self, "PROJECT_ROOT", "Unknown") / getattr(
-                self, "TEMP_DIR", "Unknown"
-            )
+        if not self.DATA_DIR.is_absolute():
+            self.DATA_DIR = self.PROJECT_ROOT / self.DATA_DIR
+        if not self.TEMP_DIR.is_absolute():
+            self.TEMP_DIR = self.PROJECT_ROOT / self.TEMP_DIR
 
         # 更新依赖路径
-        self.LOGS_DIR = getattr(self, "DATA_DIR", "Unknown") / "logs"
-        self.WORKFLOWS_DIR = getattr(self, "DATA_DIR", "Unknown") / "workflows"
-        self.SCREENSHOTS_DIR = getattr(self, "DATA_DIR", "Unknown") / "screenshots"
-        self.DATABASE_URL = (
-            f"sqlite:///{getattr(self, 'DATA_DIR', 'Unknown') / 'bluev.db'}"
-        )
+        self.LOGS_DIR = self.DATA_DIR / "logs"
+        self.WORKFLOWS_DIR = self.DATA_DIR / "workflows"
+        self.SCREENSHOTS_DIR = self.DATA_DIR / "screenshots"
+        self.DATABASE_URL = f"sqlite:///{self.DATA_DIR / 'bluev.db'}"
 
     def get(self, key: str, default: Any = None) -> Any:
         """获取配置项"""
@@ -200,13 +194,10 @@ class Config:
     def save_config(self, config_file: Optional[Path] = None) -> None:
         """保存配置到文件"""
         if config_file is None:
-            config_file = (
-                getattr(self, "PROJECT_ROOT", "Unknown")
-                / "getattr(config, 'json', 'Unknown')"
-            )
+            config_file = self.PROJECT_ROOT / "config.json"
 
         try:
-            config_data = getattr(self, "_model", "Unknown").model_dump()
+            config_data = self._model.model_dump()
             with open(config_file, "w", encoding="utf-8") as f:
                 json.dump(config_data, f, indent=2, ensure_ascii=False)
         except OSError as e:
@@ -216,13 +207,11 @@ class Config:
         """验证配置有效性"""
         try:
             # 重新验证模型
-            ConfigModel(**getattr(self, "_model", "Unknown").model_dump())
+            ConfigModel(**self._model.model_dump())
 
             # 验证路径存在性（对于必须存在的路径）
-            if not getattr(self, "PROJECT_ROOT", "Unknown").exists():
-                raise BlueVConfigurationError(
-                    f"项目根目录不存在: {getattr(self, 'PROJECT_ROOT', 'Unknown')}"
-                )
+            if not self.PROJECT_ROOT.exists():
+                raise BlueVConfigurationError(f"项目根目录不存在: {self.PROJECT_ROOT}")
 
             return True
         except Exception as e:
@@ -238,9 +227,9 @@ class Config:
         """转换为字典"""
         return {
             key: str(value) if isinstance(value, Path) else value
-            for key, value in getattr(self, "__dict__", "Unknown").items()
+            for key, value in self.__dict__.items()
             if not key.startswith("_")
         }
 
     def __repr__(self) -> str:
-        return f"Config(APP_NAME='{getattr(self, 'APP_NAME', 'Unknown')}', DEBUG={getattr(self, 'DEBUG', 'Unknown')})"
+        return f"Config(APP_NAME='{self.APP_NAME}', DEBUG={self.DEBUG})"
