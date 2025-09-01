@@ -6,7 +6,7 @@ BlueV 节点装饰器
 """
 
 from functools import wraps
-from typing import List, Optional, Type
+from typing import Any, Callable, List, Optional, Type
 
 from bluev.core.base_node import BaseNode
 from bluev.core.node_registry import node_registry

@@ -155,11 +155,12 @@ class Config:
             # 验证配置
             try:
                 # 类型转换以确保兼容性
-                validated_data = {}
+                validated_data: Dict[str, Any] = {}
                 for key, value in config_data.items():
-                    if hasattr(ConfigModel, key):
+                    # 只传递 ConfigModel 需要的字段
+                    if key in ConfigModel.model_fields:
                         validated_data[key] = value
-                self._model = ConfigModel(**validated_data)
+                self._model = ConfigModel(**validated_data)  # type: ignore
             except Exception as e:
                 raise BlueVConfigurationError(f"配置验证失败: {e}") from e
 

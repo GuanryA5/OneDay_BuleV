@@ -20,6 +20,7 @@ from typing import Any, Union
 
 from bluev.core.base_node import BaseNode
 from bluev.core.node_registry import NodeRegistry, node_registry
+from bluev.core.node_types import NodeInput, NodeOutput
 from bluev.core.workflow_engine import WorkflowEngine
 
 
@@ -110,7 +111,7 @@ def _resolve_single_port(node: BaseNode, kind: str) -> str:
             return p
 
     # 回退：选择第一个端口名（最小实现）
-    return specs[0].name
+    return str(specs[0].name)
 
 
 def build_engine_from_workflow(

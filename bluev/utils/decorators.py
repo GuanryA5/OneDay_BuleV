@@ -109,11 +109,11 @@ def timeout(seconds: float) -> Callable[[F], F]:
 
                 if hasattr(signal, 'SIGALRM') and hasattr(signal, 'alarm'):
                     old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-                    signal.alarm(int(seconds))
+                    signal.alarm(int(seconds))  # type: ignore
 
                     try:
                         result = func(*args, **kwargs)
-                        signal.alarm(0)
+                        signal.alarm(0)  # type: ignore
                         return result
                     finally:
                         signal.signal(signal.SIGALRM, old_handler)
