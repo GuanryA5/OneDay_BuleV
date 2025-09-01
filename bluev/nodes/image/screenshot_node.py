@@ -132,11 +132,11 @@ class ScreenshotNode(BaseNode):
                 x, y, width, height = region
                 bbox = (x, y, x + width, y + height)
                 self.logger.debug(f"区域截图: {bbox}")
-                pil_image = adapter.screenshot(region=(x, y, width, height))
+                pil_image = adapter.screenshot(region=(x, y, width, height))  # type: ignore
             else:
                 # 全屏截图
                 self.logger.debug("全屏截图")
-                pil_image = adapter.screenshot(region=None)
+                pil_image = adapter.screenshot(region=None)  # type: ignore
 
             # 转换为 numpy 数组 (RGB格式)
             image_array = np.array(pil_image)

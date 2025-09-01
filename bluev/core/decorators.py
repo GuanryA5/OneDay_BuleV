@@ -72,11 +72,10 @@ def bluev_node(
         )
 
         # 为类添加get_metadata方法
-        @classmethod
-        def get_metadata(cls: type) -> NodeMetadata:
+        def get_metadata_func(cls: type) -> NodeMetadata:
             return metadata
 
-        cls.get_metadata = get_metadata  # type: ignore
+        cls.get_metadata = classmethod(get_metadata_func)  # type: ignore
 
         # 注册节点
         try:
@@ -273,8 +272,7 @@ def deprecated_node(reason: str = "") -> Callable[[type], type]:
         # 保存原始的get_metadata方法
         original_get_metadata = cls.get_metadata
 
-        @classmethod
-        def get_metadata(cls: type) -> NodeMetadata:
+        def get_metadata_func(cls: type) -> NodeMetadata:
             metadata = original_get_metadata()
             # 添加废弃标记
             metadata.tags.append("deprecated")
@@ -282,7 +280,7 @@ def deprecated_node(reason: str = "") -> Callable[[type], type]:
                 metadata.description += f" [已废弃: {reason}]"
             return metadata
 
-        cls.get_metadata = get_metadata  # type: ignore
+        cls.get_metadata = classmethod(get_metadata_func)  # type: ignore
 
         # 添加废弃警告
         original_init = cls.__init__
@@ -292,7 +290,7 @@ def deprecated_node(reason: str = "") -> Callable[[type], type]:
             logger.warning(f"使用了废弃的节点类型: {cls.__name__}. {reason}")
             original_init(self, *args, **kwargs)
 
-        cls.__init__ = _deprecated_init_wrapper
+        setattr(cls, '__init__', _deprecated_init_wrapper)
 
         return cls
 

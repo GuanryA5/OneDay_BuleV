@@ -9,7 +9,7 @@ FindImageNode - 图像查找节点 (基础版)
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
 
-import cv2
+import cv2  # type: ignore
 import numpy as np
 
 if TYPE_CHECKING:
@@ -139,7 +139,7 @@ class FindImageNode(BaseNode):
         else:
             gray = image
 
-        return gray
+        return gray  # type: ignore
 
     async def execute(self, context: "ExecutionContext") -> Dict[str, Any]:
         """
@@ -262,7 +262,7 @@ class FindImageNode(BaseNode):
             }
 
             self.logger.info(f"图像查找完成: 耗时 {processing_time:.3f}秒")
-            return result
+            return result  # type: ignore
 
         except Exception as e:
             processing_time = time.time() - start_time

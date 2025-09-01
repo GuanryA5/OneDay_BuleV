@@ -9,6 +9,7 @@ SystemAdapter - 跨平台系统能力适配层
 from __future__ import annotations
 
 import platform
+from typing import Any
 
 
 class SystemAdapter:
