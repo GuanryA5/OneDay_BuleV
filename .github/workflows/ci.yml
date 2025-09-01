@@ -207,18 +207,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install bandit[toml]
 
+      - name: Set UTF-8 encoding for Windows
+        run: |
+          chcp 65001
+
       - name: Run security scan
+        shell: bash
         run: |
           echo "🔒 安全扫描 (bandit)"
+          export PYTHONIOENCODING=utf-8
           bandit -r bluev/ -f json -o bandit-report.json || true
-          bandit -r bluev/ -f txt
+          bandit -r bluev/ -f txt -o bandit-report.txt || true
+          echo "Bandit scan completed"
 
       - name: Upload security scan results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: security-scan-results
-          path: bandit-report.json
+          path: |
+            bandit-report.json
+            bandit-report.txt
 
   # 兼容性测试 - 定期运行 (Windows)
   compatibility-test:

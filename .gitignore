@@ -183,7 +183,7 @@ cache/
 *.sqlite
 *.sqlite3
 screenshots/
-workflows/
+# workflows/ - 注释掉，不要忽略 .github/workflows/
 user_data/
 
 # OS specific
