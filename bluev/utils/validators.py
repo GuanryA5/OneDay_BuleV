@@ -261,49 +261,49 @@ required = RequiredValidator()
 email = EmailValidator()
 
 
-def string_type():
+def string_type() -> TypeValidator:
     return TypeValidator(str)
 
 
-def int_type():
+def int_type() -> TypeValidator:
     return TypeValidator(int)
 
 
-def float_type():
+def float_type() -> TypeValidator:
     return TypeValidator(float)
 
 
-def bool_type():
+def bool_type() -> TypeValidator:
     return TypeValidator(bool)
 
 
-def min_length(length: int):
+def min_length(length: int) -> LengthValidator:
     return LengthValidator(min_length=length)
 
 
-def max_length(length: int):
+def max_length(length: int) -> LengthValidator:
     return LengthValidator(max_length=length)
 
 
-def min_value(value: Union[int, float]):
+def min_value(value: Union[int, float]) -> RangeValidator:
     return RangeValidator(min_value=value)
 
 
-def max_value(value: Union[int, float]):
+def max_value(value: Union[int, float]) -> RangeValidator:
     return RangeValidator(max_value=value)
 
 
-def choices(*options):
+def choices(*options: Any) -> ChoiceValidator:
     return ChoiceValidator(list(options))
 
 
-def existing_path():
+def existing_path() -> PathValidator:
     return PathValidator(must_exist=True)
 
 
-def existing_file():
+def existing_file() -> PathValidator:
     return PathValidator(must_exist=True, must_be_file=True)
 
 
-def existing_dir():
+def existing_dir() -> PathValidator:
     return PathValidator(must_exist=True, must_be_dir=True)

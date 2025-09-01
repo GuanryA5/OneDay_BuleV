@@ -5,7 +5,7 @@ BlueV 异常处理模块
 定义应用程序的异常层次结构和错误处理机制。
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 
 class BlueVException(Exception):
@@ -152,7 +152,7 @@ def handle_exception(
     return bluev_exception
 
 
-def safe_execute(func, *args, **kwargs):
+def safe_execute(func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
     """
     安全执行函数，捕获并转换异常
 
@@ -183,16 +183,23 @@ class ExceptionContext:
         self.reraise = reraise
         self.exception_class = exception_class
 
-    def __enter__(self) -> None:
+    def __enter__(self) -> "ExceptionContext":
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
-        if exc_type is not None:
-            handle_exception(exc_value, context=self.context, reraise=self.reraise)
+    def __exit__(
+        self,
+        exc_type: Optional[type],
+        exc_value: Optional[BaseException],
+        traceback: Optional[Any],
+    ) -> bool:
+        if exc_type is not None and exc_value is not None:
+            # 确保 exc_value 是 Exception 类型
+            if isinstance(exc_value, Exception):
+                handle_exception(exc_value, context=self.context, reraise=self.reraise)
         return not self.reraise  # 如果不重新抛出，则抑制异常
 
 
 # 便捷的上下文管理器
-def exception_context(context: str, reraise: bool = True):
+def exception_context(context: str, reraise: bool = True) -> ExceptionContext:
     """创建异常上下文管理器的便捷函数"""
     return ExceptionContext(context, reraise)

@@ -7,7 +7,7 @@ BlueV 节点注册系统
 
 import threading
 from collections import defaultdict
-from typing import Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Set
 
 from bluev.core.base_node import BaseNode
 from bluev.core.node_types import NodeClassType, NodeMetadata
@@ -280,7 +280,7 @@ class NodeRegistry:
         with self._lock:
             return node_type in self._node_classes
 
-    def get_registry_info(self) -> Dict[str, any]:
+    def get_registry_info(self) -> Dict[str, Any]:
         """
         获取注册器信息
 

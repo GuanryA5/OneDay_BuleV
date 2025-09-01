@@ -90,20 +90,20 @@ class NodeInput:
 
     def _validate_numeric_range(self, value: Any) -> bool:
         """验证数值范围"""
-        if "min_value" in self.validation_rules:
+        if self.validation_rules and "min_value" in self.validation_rules:
             if value < self.validation_rules["min_value"]:
                 return False
-        if "max_value" in self.validation_rules:
+        if self.validation_rules and "max_value" in self.validation_rules:
             if value > self.validation_rules["max_value"]:
                 return False
         return True
 
     def _validate_string_length(self, value: Any) -> bool:
         """验证字符串长度"""
-        if "min_length" in self.validation_rules:
+        if self.validation_rules and "min_length" in self.validation_rules:
             if len(str(value)) < self.validation_rules["min_length"]:
                 return False
-        if "max_length" in self.validation_rules:
+        if self.validation_rules and "max_length" in self.validation_rules:
             if len(str(value)) > self.validation_rules["max_length"]:
                 return False
         return True
