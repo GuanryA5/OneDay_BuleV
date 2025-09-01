@@ -192,12 +192,11 @@ def cache_result(ttl: Optional[float] = None) -> Callable[[F], F]:
             return result
 
         # 添加清除缓存的方法
-        setattr(wrapper, "clear_cache", lambda: cache.clear())  # noqa: B010
-        setattr(
-            wrapper,
-            "cache_info",
-            lambda: {"cache_size": len(cache), "cache_keys": list(cache.keys())},
-        )  # noqa: B010
+        wrapper.clear_cache = lambda: cache.clear()  # type: ignore
+        wrapper.cache_info = lambda: {  # type: ignore
+            "cache_size": len(cache),
+            "cache_keys": list(cache.keys()),
+        }
 
         return wrapper  # type: ignore
 
