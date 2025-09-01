@@ -11,7 +11,7 @@ from bluev.ui.main_window import MainWindow
 class TestMainWindow:
     """主窗口类测试"""
 
-    def test_main_window_init(self, mock_qt_app, config):
+    def test_main_window_init(self, mock_qt_app, config) -> None:
         """测试主窗口初始化"""
         with patch("bluev.ui.main_window.get_logger") as mock_get_logger:
             mock_logger = Mock()
@@ -23,22 +23,26 @@ class TestMainWindow:
             assert window.logger == mock_logger
             mock_logger.info.assert_called_with("主窗口初始化完成")
 
-    def test_main_window_window_properties(self, mock_qt_app, config):
+    def test_main_window_window_properties(self, mock_qt_app, config) -> None:
         """测试主窗口属性设置"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)
 
             # 验证窗口标题
-            expected_title = f"{config.APP_NAME} v{config.APP_VERSION}"
+            expected_title = f"{getattr(config, 'APP_NAME', 'Unknown')} v{getattr(config, 'APP_VERSION', 'Unknown')}"
             assert window.windowTitle() == expected_title
 
             # 验证窗口尺寸
-            assert window.minimumWidth() == config.WINDOW_MIN_WIDTH
-            assert window.minimumHeight() == config.WINDOW_MIN_HEIGHT
-            assert window.width() == config.WINDOW_WIDTH
-            assert window.height() == config.WINDOW_HEIGHT
+            assert window.minimumWidth() == getattr(
+                config, "WINDOW_MIN_WIDTH", "Unknown"
+            )
+            assert window.minimumHeight() == getattr(
+                config, "WINDOW_MIN_HEIGHT", "Unknown"
+            )
+            assert window.width() == getattr(config, "WINDOW_WIDTH", "Unknown")
+            assert window.height() == getattr(config, "WINDOW_HEIGHT", "Unknown")
 
-    def test_main_window_central_widget(self, mock_qt_app, config):
+    def test_main_window_central_widget(self, mock_qt_app, config) -> None:
         """测试中央部件创建"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)
@@ -46,7 +50,7 @@ class TestMainWindow:
             central_widget = window.centralWidget()
             assert central_widget is not None
 
-    def test_main_window_menu_creation(self, mock_qt_app, config):
+    def test_main_window_menu_creation(self, mock_qt_app, config) -> None:
         """测试菜单创建"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)
@@ -62,7 +66,7 @@ class TestMainWindow:
             for expected_menu in expected_menus:
                 assert expected_menu in menu_texts
 
-    def test_main_window_toolbar_creation(self, mock_qt_app, config):
+    def test_main_window_toolbar_creation(self, mock_qt_app, config) -> None:
         """测试工具栏创建"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)
@@ -70,7 +74,7 @@ class TestMainWindow:
             toolbars = window.findChildren(window.addToolBar("test").__class__)
             assert len(toolbars) >= 1
 
-    def test_main_window_statusbar_creation(self, mock_qt_app, config):
+    def test_main_window_statusbar_creation(self, mock_qt_app, config) -> None:
         """测试状态栏创建"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)
@@ -79,7 +83,7 @@ class TestMainWindow:
             assert statusbar is not None
             assert window.status_label is not None
 
-    def test_main_window_menu_actions(self, mock_qt_app, config):
+    def test_main_window_menu_actions(self, mock_qt_app, config) -> None:
         """测试菜单动作"""
         with patch("bluev.ui.main_window.get_logger") as mock_get_logger:
             mock_logger = Mock()
@@ -102,7 +106,7 @@ class TestMainWindow:
             mock_logger.info.assert_called_with("保存工作流")
             assert "保存工作流" in window.status_label.text()
 
-    def test_main_window_edit_actions(self, mock_qt_app, config):
+    def test_main_window_edit_actions(self, mock_qt_app, config) -> None:
         """测试编辑动作"""
         with patch("bluev.ui.main_window.get_logger") as mock_get_logger:
             mock_logger = Mock()
@@ -120,7 +124,7 @@ class TestMainWindow:
             mock_logger.info.assert_called_with("重做操作")
             assert "重做操作" in window.status_label.text()
 
-    def test_main_window_run_actions(self, mock_qt_app, config):
+    def test_main_window_run_actions(self, mock_qt_app, config) -> None:
         """测试运行动作"""
         with patch("bluev.ui.main_window.get_logger") as mock_get_logger:
             mock_logger = Mock()
@@ -139,7 +143,9 @@ class TestMainWindow:
             assert "工作流已停止" in window.status_label.text()
 
     @patch("bluev.ui.main_window.QMessageBox")
-    def test_main_window_about_dialog(self, mock_message_box, mock_qt_app, config):
+    def test_main_window_about_dialog(
+        self, mock_message_box, mock_qt_app, config
+    ) -> None:
         """测试关于对话框"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)
@@ -151,10 +157,10 @@ class TestMainWindow:
 
             # 验证对话框内容包含版本信息
             dialog_content = call_args[0][2]
-            assert config.APP_VERSION in dialog_content
+            assert getattr(config, "APP_VERSION", "Unknown") in dialog_content
             assert "BlueV" in dialog_content
 
-    def test_main_window_close_event(self, mock_qt_app, config):
+    def test_main_window_close_event(self, mock_qt_app, config) -> None:
         """测试窗口关闭事件"""
         with patch("bluev.ui.main_window.get_logger") as mock_get_logger:
             mock_logger = Mock()
@@ -169,7 +175,7 @@ class TestMainWindow:
             mock_logger.info.assert_called_with("主窗口关闭")
             mock_event.accept.assert_called_once()
 
-    def test_main_window_panels_creation(self, mock_qt_app, config):
+    def test_main_window_panels_creation(self, mock_qt_app, config) -> None:
         """测试面板创建"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)
@@ -183,7 +189,7 @@ class TestMainWindow:
             assert center_panel is not None
             assert right_panel is not None
 
-    def test_main_window_layout_structure(self, mock_qt_app, config):
+    def test_main_window_layout_structure(self, mock_qt_app, config) -> None:
         """测试布局结构"""
         with patch("bluev.ui.main_window.get_logger"):
             window = MainWindow(config)

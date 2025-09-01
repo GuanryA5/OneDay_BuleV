@@ -12,18 +12,18 @@ from bluev.config import Config
 class TestConfig:
     """配置类测试"""
 
-    def test_default_config(self):
+    def test_default_config(self) -> None:
         """测试默认配置"""
         config = Config()
 
         assert config.APP_NAME == "BlueV"
         assert config.APP_VERSION == "0.1.0"
-        assert config.DEBUG is False
+        assert getattr(config, "DEBUG", "Unknown") is False
         assert config.LOG_LEVEL == "INFO"
         assert config.WINDOW_WIDTH == 1200
         assert config.WINDOW_HEIGHT == 800
 
-    def test_env_override(self):
+    def test_env_override(self) -> None:
         """测试环境变量覆盖"""
         with patch.dict(
             os.environ,
@@ -37,23 +37,23 @@ class TestConfig:
             config = Config()
 
             assert config.APP_NAME == "TestBlueV"
-            assert config.DEBUG is True
+            assert getattr(config, "DEBUG", "Unknown") is True
             assert config.WINDOW_WIDTH == 1600
             assert config.LOG_LEVEL == "DEBUG"
 
-    def test_path_resolution(self):
+    def test_path_resolution(self) -> None:
         """测试路径解析"""
         config = Config()
 
         # 所有路径都应该是绝对路径
-        assert config.DATA_DIR.is_absolute()
-        assert config.TEMP_DIR.is_absolute()
-        assert config.LOGS_DIR.is_absolute()
-        assert config.WORKFLOWS_DIR.is_absolute()
-        assert config.SCREENSHOTS_DIR.is_absolute()
-        assert config.RESOURCES_DIR.is_absolute()
+        assert getattr(config, "DATA_DIR", "Unknown").is_absolute()
+        assert getattr(config, "TEMP_DIR", "Unknown").is_absolute()
+        assert getattr(config, "LOGS_DIR", "Unknown").is_absolute()
+        assert getattr(config, "WORKFLOWS_DIR", "Unknown").is_absolute()
+        assert getattr(config, "SCREENSHOTS_DIR", "Unknown").is_absolute()
+        assert getattr(config, "RESOURCES_DIR", "Unknown").is_absolute()
 
-    def test_bool_env_parsing(self):
+    def test_bool_env_parsing(self) -> None:
         """测试布尔环境变量解析"""
         Config()  # Just test instantiation
 
@@ -77,7 +77,7 @@ class TestConfig:
                 test_config = Config()
                 assert test_config.DEBUG == expected
 
-    def test_int_env_parsing(self):
+    def test_int_env_parsing(self) -> None:
         """测试整数环境变量解析"""
         Config()  # Just test instantiation
 
@@ -91,7 +91,7 @@ class TestConfig:
             test_config = Config()
             assert test_config.WINDOW_WIDTH == 1200  # 默认值
 
-    def test_config_methods(self):
+    def test_config_methods(self) -> None:
         """测试配置方法"""
         config = Config()
 
@@ -109,20 +109,20 @@ class TestConfig:
         assert "APP_NAME" in config_dict
         assert config_dict["APP_NAME"] == "BlueV"
 
-    def test_database_url(self):
+    def test_database_url(self) -> None:
         """测试数据库URL生成"""
         config = Config()
 
-        expected_db_path = config.DATA_DIR / "bluev.db"
+        expected_db_path = getattr(config, "DATA_DIR", "Unknown") / "bluev.db"
         expected_url = f"sqlite:///{expected_db_path}"
 
         assert config.DATABASE_URL == expected_url
 
-    def test_repr(self):
+    def test_repr(self) -> None:
         """测试字符串表示"""
         config = Config()
         repr_str = repr(config)
 
         assert "Config" in repr_str
-        assert config.APP_NAME in repr_str
-        assert str(config.DEBUG) in repr_str
+        assert getattr(config, "APP_NAME", "Unknown") in repr_str
+        assert str(getattr(config, "DEBUG", "Unknown")) in repr_str

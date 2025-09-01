@@ -15,7 +15,7 @@ from bluev.utils.exceptions import BlueVValidationError
 class Validator:
     """基础验证器类"""
 
-    def __init__(self, error_message: str = "验证失败"):
+    def __init__(self, error_message: str = "验证失败") -> None:
         self.error_message = error_message
 
     def validate(self, value: Any) -> bool:
@@ -32,7 +32,7 @@ class Validator:
 class RequiredValidator(Validator):
     """必填验证器"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("此字段为必填项")
 
     def validate(self, value: Any) -> bool:
@@ -42,7 +42,7 @@ class RequiredValidator(Validator):
 class TypeValidator(Validator):
     """类型验证器"""
 
-    def __init__(self, expected_type: type):
+    def __init__(self, expected_type: type) -> None:
         self.expected_type = expected_type
         super().__init__(f"期望类型 {expected_type.__name__}")
 
@@ -113,7 +113,7 @@ class LengthValidator(Validator):
 class RegexValidator(Validator):
     """正则表达式验证器"""
 
-    def __init__(self, pattern: str, flags: int = 0):
+    def __init__(self, pattern: str, flags: int = 0) -> None:
         self.pattern = re.compile(pattern, flags)
         super().__init__(f"值必须匹配模式: {pattern}")
 
@@ -127,7 +127,7 @@ class RegexValidator(Validator):
 class EmailValidator(RegexValidator):
     """邮箱验证器"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         super().__init__(email_pattern)
         self.error_message = "请输入有效的邮箱地址"
@@ -171,7 +171,7 @@ class PathValidator(Validator):
 class ChoiceValidator(Validator):
     """选择验证器"""
 
-    def __init__(self, choices: List[Any]):
+    def __init__(self, choices: List[Any]) -> None:
         self.choices = choices
         super().__init__(f"值必须是以下选项之一: {choices}")
 
@@ -182,7 +182,7 @@ class ChoiceValidator(Validator):
 class CompositeValidator(Validator):
     """复合验证器"""
 
-    def __init__(self, validators: List[Validator], require_all: bool = True):
+    def __init__(self, validators: List[Validator], require_all: bool = True) -> None:
         self.validators = validators
         self.require_all = require_all
         super().__init__("复合验证失败")

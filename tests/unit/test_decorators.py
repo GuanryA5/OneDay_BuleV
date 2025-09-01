@@ -21,7 +21,7 @@ from bluev.utils.decorators import (
 class TestRetryDecorator:
     """重试装饰器测试"""
 
-    def test_retry_success_first_attempt(self):
+    def test_retry_success_first_attempt(self) -> None:
         """测试第一次尝试就成功"""
         call_count = 0
 
@@ -35,7 +35,7 @@ class TestRetryDecorator:
         assert result == "success"
         assert call_count == 1
 
-    def test_retry_success_after_failures(self):
+    def test_retry_success_after_failures(self) -> None:
         """测试重试后成功"""
         call_count = 0
 
@@ -51,7 +51,7 @@ class TestRetryDecorator:
         assert result == "success"
         assert call_count == 3
 
-    def test_retry_max_attempts_exceeded(self):
+    def test_retry_max_attempts_exceeded(self) -> None:
         """测试超过最大重试次数"""
         call_count = 0
 
@@ -65,7 +65,7 @@ class TestRetryDecorator:
             test_func()
         assert call_count == 2
 
-    def test_retry_specific_exceptions(self):
+    def test_retry_specific_exceptions(self) -> None:
         """测试只重试特定异常"""
 
         @retry(max_attempts=3, delay=0.01, exceptions=(ValueError,))
@@ -87,7 +87,7 @@ class TestTimeoutDecorator:
     """超时装饰器测试"""
 
     @pytest.mark.skipif(True, reason="信号在Windows上可能不工作")
-    def test_timeout_success(self):
+    def test_timeout_success(self) -> None:
         """测试在超时前完成"""
 
         @timeout(1.0)
@@ -98,7 +98,7 @@ class TestTimeoutDecorator:
         assert result == "completed"
 
     @pytest.mark.skipif(True, reason="信号在Windows上可能不工作")
-    def test_timeout_exceeded(self):
+    def test_timeout_exceeded(self) -> None:
         """测试超时"""
 
         @timeout(0.1)
@@ -113,7 +113,7 @@ class TestTimeoutDecorator:
 class TestValidateTypesDecorator:
     """类型验证装饰器测试"""
 
-    def test_validate_types_success(self):
+    def test_validate_types_success(self) -> None:
         """测试类型验证成功"""
 
         @validate_types(x=int, y=str)
@@ -123,7 +123,7 @@ class TestValidateTypesDecorator:
         result = test_func(42, "hello")
         assert result == "42: hello"
 
-    def test_validate_types_failure(self):
+    def test_validate_types_failure(self) -> None:
         """测试类型验证失败"""
 
         @validate_types(x=int, y=str)
@@ -133,7 +133,7 @@ class TestValidateTypesDecorator:
         with pytest.raises(TypeError):
             test_func("not_int", "hello")
 
-    def test_validate_types_none_allowed(self):
+    def test_validate_types_none_allowed(self) -> None:
         """测试None值被允许"""
 
         @validate_types(x=int)
@@ -147,7 +147,7 @@ class TestValidateTypesDecorator:
 class TestCacheResultDecorator:
     """结果缓存装饰器测试"""
 
-    def test_cache_result_basic(self):
+    def test_cache_result_basic(self) -> None:
         """测试基础缓存功能"""
         call_count = 0
 
@@ -172,7 +172,7 @@ class TestCacheResultDecorator:
         assert result3 == 20
         assert call_count == 2
 
-    def test_cache_result_with_ttl(self):
+    def test_cache_result_with_ttl(self) -> None:
         """测试带TTL的缓存"""
         call_count = 0
 
@@ -198,7 +198,7 @@ class TestCacheResultDecorator:
         assert result3 == 1
         assert call_count == 2
 
-    def test_cache_clear(self):
+    def test_cache_clear(self) -> None:
         """测试清除缓存"""
         call_count = 0
 
@@ -222,12 +222,12 @@ class TestCacheResultDecorator:
 class TestSingletonDecorator:
     """单例装饰器测试"""
 
-    def test_singleton_same_instance(self):
+    def test_singleton_same_instance(self) -> None:
         """测试单例返回相同实例"""
 
         @singleton
         class TestClass:
-            def __init__(self, value=0):
+            def __init__(self, value=0) -> None:
                 self.value = value
 
         instance1 = TestClass(10)
@@ -240,7 +240,7 @@ class TestSingletonDecorator:
 class TestDeprecatedDecorator:
     """废弃警告装饰器测试"""
 
-    def test_deprecated_warning(self):
+    def test_deprecated_warning(self) -> None:
         """测试废弃警告"""
 
         @deprecated("使用新函数替代")
@@ -255,7 +255,7 @@ class TestDeprecatedDecorator:
 class TestSafeCallDecorator:
     """安全调用装饰器测试"""
 
-    def test_safe_call_success(self):
+    def test_safe_call_success(self) -> None:
         """测试安全调用成功"""
 
         @safe_call(default_return="default")
@@ -265,7 +265,7 @@ class TestSafeCallDecorator:
         result = test_func()
         assert result == "success"
 
-    def test_safe_call_exception_with_default(self):
+    def test_safe_call_exception_with_default(self) -> None:
         """测试异常时返回默认值"""
 
         @safe_call(default_return="default")
@@ -275,7 +275,7 @@ class TestSafeCallDecorator:
         result = test_func()
         assert result == "default"
 
-    def test_safe_call_exception_no_logging(self):
+    def test_safe_call_exception_no_logging(self) -> None:
         """测试异常时不记录日志"""
 
         @safe_call(default_return="default", log_errors=False)
@@ -285,7 +285,7 @@ class TestSafeCallDecorator:
         result = test_func()
         assert result == "default"
 
-    def test_safe_call_none_default(self):
+    def test_safe_call_none_default(self) -> None:
         """测试默认返回None"""
 
         @safe_call()

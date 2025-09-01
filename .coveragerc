@@ -1,0 +1,18 @@
+[run]
+branch = True
+parallel = False
+source =
+    bluev
+omit =
+    */__init__.py
+    bluev/ui/*
+    bluev/main.py
+    bluev/utils/perf/*
+
+[report]
+show_missing = True
+skip_covered = True
+exclude_lines =
+    pragma: no cover
+    if TYPE_CHECKING:
+    if __name__ == .__main__.:

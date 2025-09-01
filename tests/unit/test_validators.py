@@ -25,7 +25,7 @@ from bluev.utils.validators import (
 class TestBasicValidators:
     """基础验证器测试"""
 
-    def test_required_validator(self):
+    def test_required_validator(self) -> None:
         """测试必填验证器"""
         validator = RequiredValidator()
 
@@ -38,7 +38,7 @@ class TestBasicValidators:
         assert validator.validate(None) is False
         assert validator.validate("") is False
 
-    def test_type_validator(self):
+    def test_type_validator(self) -> None:
         """测试类型验证器"""
         str_validator = TypeValidator(str)
         int_validator = TypeValidator(int)
@@ -51,7 +51,7 @@ class TestBasicValidators:
         assert int_validator.validate(123) is True
         assert int_validator.validate("test") is False
 
-    def test_range_validator(self):
+    def test_range_validator(self) -> None:
         """测试范围验证器"""
         validator = RangeValidator(min_value=0, max_value=100)
 
@@ -66,7 +66,7 @@ class TestBasicValidators:
         assert validator.validate(101) is False
         assert validator.validate("invalid") is False
 
-    def test_length_validator(self):
+    def test_length_validator(self) -> None:
         """测试长度验证器"""
         validator = LengthValidator(min_length=2, max_length=10)
 
@@ -79,7 +79,7 @@ class TestBasicValidators:
         assert validator.validate("a" * 11) is False  # 太长
         assert validator.validate(123) is False  # 没有长度
 
-    def test_regex_validator(self):
+    def test_regex_validator(self) -> None:
         """测试正则表达式验证器"""
         validator = RegexValidator(r"^\d{3}-\d{4}$")
 
@@ -90,7 +90,7 @@ class TestBasicValidators:
         assert validator.validate("123-456") is False
         assert validator.validate("abc-defg") is False
 
-    def test_email_validator(self):
+    def test_email_validator(self) -> None:
         """测试邮箱验证器"""
         validator = EmailValidator()
 
@@ -103,7 +103,7 @@ class TestBasicValidators:
         assert validator.validate("@example.com") is False
         assert validator.validate("test@") is False
 
-    def test_choice_validator(self):
+    def test_choice_validator(self) -> None:
         """测试选择验证器"""
         validator = ChoiceValidator(["red", "green", "blue"])
 
@@ -119,7 +119,7 @@ class TestBasicValidators:
 class TestPathValidator:
     """路径验证器测试"""
 
-    def test_path_validator_basic(self):
+    def test_path_validator_basic(self) -> None:
         """测试基础路径验证"""
         validator = PathValidator()
 
@@ -128,7 +128,7 @@ class TestPathValidator:
         assert validator.validate("relative/path") is True
         assert validator.validate("C:\\Windows\\System32") is True
 
-    def test_path_validator_must_exist(self, tmp_path):
+    def test_path_validator_must_exist(self, tmp_path) -> None:
         """测试路径必须存在"""
         validator = PathValidator(must_exist=True)
 
@@ -139,7 +139,7 @@ class TestPathValidator:
         non_existent = tmp_path / "non_existent"
         assert validator.validate(str(non_existent)) is False
 
-    def test_path_validator_must_be_file(self, tmp_path):
+    def test_path_validator_must_be_file(self, tmp_path) -> None:
         """测试路径必须是文件"""
         validator = PathValidator(must_exist=True, must_be_file=True)
 
@@ -153,7 +153,7 @@ class TestPathValidator:
         # 目录路径
         assert validator.validate(str(tmp_path)) is False
 
-    def test_path_validator_must_be_dir(self, tmp_path):
+    def test_path_validator_must_be_dir(self, tmp_path) -> None:
         """测试路径必须是目录"""
         validator = PathValidator(must_exist=True, must_be_dir=True)
 
@@ -171,7 +171,7 @@ class TestPathValidator:
 class TestCompositeValidator:
     """复合验证器测试"""
 
-    def test_composite_validator_all_required(self):
+    def test_composite_validator_all_required(self) -> None:
         """测试所有验证器都必须通过"""
         validator = CompositeValidator(
             [RequiredValidator(), TypeValidator(str), LengthValidator(min_length=3)],
@@ -186,7 +186,7 @@ class TestCompositeValidator:
         assert validator.validate(123) is False  # 类型错误
         assert validator.validate(None) is False  # 必填验证失败
 
-    def test_composite_validator_any_required(self):
+    def test_composite_validator_any_required(self) -> None:
         """测试至少一个验证器通过"""
         validator = CompositeValidator(
             [TypeValidator(str), TypeValidator(int)], require_all=False
@@ -205,7 +205,7 @@ class TestCompositeValidator:
 class TestValidateData:
     """数据验证函数测试"""
 
-    def test_validate_data_success(self):
+    def test_validate_data_success(self) -> None:
         """测试数据验证成功"""
         data = {"name": "John Doe", "age": 30, "email": "john@example.com"}
 
@@ -218,7 +218,7 @@ class TestValidateData:
         result = validate_data(data, schema)
         assert result == data
 
-    def test_validate_data_failure(self):
+    def test_validate_data_failure(self) -> None:
         """测试数据验证失败"""
         data = {
             "name": "",  # 必填但为空
@@ -244,14 +244,14 @@ class TestValidateData:
 class TestPreDefinedValidators:
     """预定义验证器测试"""
 
-    def test_required_validator_instance(self):
+    def test_required_validator_instance(self) -> None:
         """测试预定义的required验证器"""
         with pytest.raises(BlueVValidationError):
             required(None)
 
         assert required("test") == "test"
 
-    def test_email_validator_instance(self):
+    def test_email_validator_instance(self) -> None:
         """测试预定义的email验证器"""
         with pytest.raises(BlueVValidationError):
             email("invalid-email")

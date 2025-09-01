@@ -1,0 +1,33 @@
+# 质量审查记录：Engine-first 最小闭环
+- **状态:** IN_REVIEW
+- **审查日期:** 2025-09-01
+- **审查依据:** docs/03-planning/engine-first-milestone-plan.md
+---
+## DoD (完成定义) 验证清单
+- [ ] 接口与契约收敛
+  - DoD: BaseNode/Registry/Engine 的接口与类型稳定，有注释与示例
+  - 验证: 代码走查 + mypy/ruff 通过
+- [x] 工作流定义与加载器
+  - DoD: 支持顺序/简单依赖；加载 JSON/代码两种
+  - 验证: 单元测试 + 示例加载成功
+- [x] 5节点验收（Screenshot/FindImage/Click/Delay/Log）
+  - DoD: 各节点参数校验、执行成功、错误可诊断
+  - 验证: 单元测试 + 手动脚本
+- [x] 集成执行闭环
+  - DoD: 示例工作流跑通，执行日志完整，失败可定位
+  - 验证: 集成测试 + CI 日志
+- [ ] 单元测试（core+nodes）
+  - DoD: 覆盖率≥80%，关键路径全覆盖
+  - 验证: pytest --cov 报告
+- [ ] 集成测试（无 UI）
+  - DoD: CI 全绿，Windows 2022 + Python 3.12.3 通过
+  - 验证: GitHub Actions 记录
+- [x] Quick Start 示例
+  - DoD: 新人 10 分钟可跑通
+  - 验证: 文档走查 + 新人测试反馈
+- [ ] 节点规范文档
+  - DoD: 输入/输出/元数据规范化，示例齐全
+  - 验证: MkDocs 生成预览
+---
+## 最终结论 (Final Verdict)
+- (在状态更新为 PASSED 或 FAILED 后填写)

@@ -68,18 +68,18 @@ jobs:
           python -c "import numpy; print(f'NumPy: {numpy.__version__}')"
           python -c "import pyautogui; print(f'PyAutoGUI: {pyautogui.__version__}')"
 
-      - name: Run Ruff linting
+      - name: Run Ruff linting (strict)
         shell: bash -l {0}
         run: |
           conda activate ${{ env.CONDA_ENV }}
-          echo "🔍 代码检查 (Ruff)"
+          echo "🔍 代码检查 (Ruff - strict)"
           ruff check . --output-format=github
 
-      - name: Run Ruff formatting check
+      - name: Run Ruff formatting check (strict)
         shell: bash -l {0}
         run: |
           conda activate ${{ env.CONDA_ENV }}
-          echo "🔍 格式检查 (Ruff)"
+          echo "🔍 格式检查 (Ruff - strict)"
           ruff format --check .
 
   # 完整测试 - Windows GUI 测试
@@ -180,12 +180,12 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Run mypy type checking
+      - name: Run mypy type checking (strict)
         shell: bash -l {0}
         run: |
           conda activate ${{ env.CONDA_ENV }}
-          echo "🔍 类型检查 (mypy)"
-          mypy bluev/ --show-error-codes --pretty
+          echo "🔍 类型检查 (mypy - strict)"
+          mypy bluev/ --show-error-codes --pretty --strict-optional --warn-redundant-casts --warn-unused-ignores --no-warn-no-return
 
   # 安全扫描
   security-scan:

@@ -15,7 +15,7 @@ from bluev.utils.exceptions import BlueVCriticalError, BlueVException
 class TestBlueVApplication:
     """BlueV应用程序类测试"""
 
-    def test_application_init(self):
+    def test_application_init(self) -> None:
         """测试应用程序初始化"""
         app = BlueVApplication()
 
@@ -25,7 +25,7 @@ class TestBlueVApplication:
         assert app.logger is None
         assert app._shutdown_requested is False
 
-    def test_setup_directories(self):
+    def test_setup_directories(self) -> None:
         """测试目录创建"""
         app = BlueVApplication()
         app.logger = Mock()
@@ -43,7 +43,7 @@ class TestBlueVApplication:
             assert mock_mkdir.call_count == 5
 
     @patch("PySide6.QtWidgets.QApplication")
-    def test_setup_application(self, mock_qapp_class):
+    def test_setup_application(self, mock_qapp_class) -> None:
         """测试Qt应用程序设置"""
         mock_qapp = Mock()
         mock_qapp_class.return_value = mock_qapp
@@ -52,10 +52,14 @@ class TestBlueVApplication:
         result = app.setup_application()
 
         assert result == mock_qapp
-        mock_qapp.setApplicationName.assert_called_with(app.config.APP_NAME)
-        mock_qapp.setApplicationVersion.assert_called_with(app.config.APP_VERSION)
+        mock_qapp.setApplicationName.assert_called_with(
+            getattr(app.config, "APP_NAME", "BlueV")
+        )
+        mock_qapp.setApplicationVersion.assert_called_with(
+            getattr(app.config, "APP_VERSION", "0.1.0")
+        )
 
-    def test_setup_signal_handlers(self):
+    def test_setup_signal_handlers(self) -> None:
         """测试信号处理器设置"""
         app = BlueVApplication()
         app.logger = Mock()
@@ -65,7 +69,7 @@ class TestBlueVApplication:
             # 验证信号处理器被设置
             assert mock_signal.call_count == 2
 
-    def test_setup_exception_handler(self):
+    def test_setup_exception_handler(self) -> None:
         """测试异常处理器设置"""
         app = BlueVApplication()
         app.logger = Mock()
@@ -115,7 +119,9 @@ class TestBlueVApplication:
 
     @patch("bluev.main.setup_logging")
     @patch("bluev.main.get_logger")
-    def test_run_bluev_critical_error(self, mock_get_logger, mock_setup_logging):
+    def test_run_bluev_critical_error(
+        self, mock_get_logger, mock_setup_logging
+    ) -> None:
         """测试应用程序运行时的严重错误"""
         mock_logger = Mock()
         mock_get_logger.return_value = mock_logger
@@ -130,7 +136,7 @@ class TestBlueVApplication:
 
     @patch("bluev.main.setup_logging")
     @patch("bluev.main.get_logger")
-    def test_run_bluev_exception(self, mock_get_logger, mock_setup_logging):
+    def test_run_bluev_exception(self, mock_get_logger, mock_setup_logging) -> None:
         """测试应用程序运行时的一般错误"""
         mock_logger = Mock()
         mock_get_logger.return_value = mock_logger
@@ -144,7 +150,7 @@ class TestBlueVApplication:
         mock_logger.error.assert_called()
 
     @patch("bluev.main.setup_logging")
-    def test_run_unknown_exception(self, mock_setup_logging):
+    def test_run_unknown_exception(self, mock_setup_logging) -> None:
         """测试应用程序运行时的未知错误"""
         mock_setup_logging.side_effect = RuntimeError("未知错误")
 
@@ -153,7 +159,7 @@ class TestBlueVApplication:
 
         assert result == 1
 
-    def test_cleanup(self):
+    def test_cleanup(self) -> None:
         """测试资源清理"""
         app = BlueVApplication()
         app.logger = Mock()
@@ -167,7 +173,7 @@ class TestBlueVApplication:
         assert app.main_window is None
         assert app.app is None
 
-    def test_cleanup_with_exception(self):
+    def test_cleanup_with_exception(self) -> None:
         """测试清理时发生异常"""
         app = BlueVApplication()
         app.logger = Mock()
@@ -183,7 +189,7 @@ class TestMainFunction:
     """主函数测试"""
 
     @patch("bluev.main.BlueVApplication")
-    def test_main_success(self, mock_app_class):
+    def test_main_success(self, mock_app_class) -> None:
         """测试主函数成功执行"""
         mock_app = Mock()
         mock_app.run.return_value = 0
@@ -196,7 +202,7 @@ class TestMainFunction:
         mock_app.cleanup.assert_called_once()
 
     @patch("bluev.main.BlueVApplication")
-    def test_main_keyboard_interrupt(self, mock_app_class):
+    def test_main_keyboard_interrupt(self, mock_app_class) -> None:
         """测试主函数键盘中断"""
         mock_app = Mock()
         mock_app.run.side_effect = KeyboardInterrupt()
@@ -208,7 +214,7 @@ class TestMainFunction:
         mock_app.cleanup.assert_called_once()
 
     @patch("bluev.main.BlueVApplication")
-    def test_main_exception(self, mock_app_class):
+    def test_main_exception(self, mock_app_class) -> None:
         """测试主函数异常处理"""
         mock_app = Mock()
         mock_app.run.side_effect = Exception("测试异常")
@@ -220,7 +226,7 @@ class TestMainFunction:
         mock_app.cleanup.assert_called_once()
 
     @patch("bluev.main.BlueVApplication")
-    def test_main_cleanup_exception(self, mock_app_class):
+    def test_main_cleanup_exception(self, mock_app_class) -> None:
         """测试主函数清理时异常"""
         mock_app = Mock()
         mock_app.run.return_value = 0

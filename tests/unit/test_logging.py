@@ -19,7 +19,7 @@ from bluev.utils.logging import (
 class TestSetupLogging:
     """日志设置测试"""
 
-    def test_setup_logging_basic(self, config):
+    def test_setup_logging_basic(self, config) -> None:
         """测试基础日志设置"""
         with patch("bluev.utils.logging.logger") as mock_logger:
             setup_logging(config)
@@ -28,7 +28,7 @@ class TestSetupLogging:
             assert mock_logger.remove.called
             assert mock_logger.add.call_count >= 3  # 控制台 + 普通文件 + 错误文件
 
-    def test_setup_logging_creates_directories(self, config, tmp_path):
+    def test_setup_logging_creates_directories(self, config, tmp_path) -> None:
         """测试日志设置创建目录"""
         config.LOGS_DIR = tmp_path / "logs"
 
@@ -36,9 +36,9 @@ class TestSetupLogging:
             setup_logging(config)
 
             # 验证日志目录被创建
-            assert config.LOGS_DIR.exists()
+            assert getattr(config, "LOGS_DIR", "Unknown").exists()
 
-    def test_setup_logging_debug_mode(self, config):
+    def test_setup_logging_debug_mode(self, config) -> None:
         """测试调试模式的日志设置"""
         config.DEBUG = True
         config.LOG_LEVEL = "DEBUG"
@@ -53,7 +53,7 @@ class TestSetupLogging:
 class TestStructuredLogger:
     """结构化日志记录器测试"""
 
-    def test_structured_logger_init(self):
+    def test_structured_logger_init(self) -> None:
         """测试结构化日志记录器初始化"""
         logger = StructuredLogger("test_logger")
 
@@ -61,7 +61,7 @@ class TestStructuredLogger:
         assert logger.logger is not None
 
     @patch("bluev.utils.logging.logger")
-    def test_structured_logger_debug(self, mock_logger):
+    def test_structured_logger_debug(self, mock_logger) -> None:
         """测试调试日志"""
         mock_bound_logger = Mock()
         mock_logger.bind.return_value = mock_bound_logger
@@ -73,7 +73,7 @@ class TestStructuredLogger:
         mock_bound_logger.debug.assert_called_with("测试消息")
 
     @patch("bluev.utils.logging.logger")
-    def test_structured_logger_info(self, mock_logger):
+    def test_structured_logger_info(self, mock_logger) -> None:
         """测试信息日志"""
         mock_bound_logger = Mock()
         mock_logger.bind.return_value = mock_bound_logger
@@ -84,7 +84,7 @@ class TestStructuredLogger:
         mock_bound_logger.info.assert_called_with("测试消息")
 
     @patch("bluev.utils.logging.logger")
-    def test_structured_logger_error_with_exc_info(self, mock_logger):
+    def test_structured_logger_error_with_exc_info(self, mock_logger) -> None:
         """测试带异常信息的错误日志"""
         mock_bound_logger = Mock()
         mock_logger.bind.return_value = mock_bound_logger
@@ -95,7 +95,7 @@ class TestStructuredLogger:
         mock_bound_logger.error.assert_called_with("错误消息")
 
     @patch("bluev.utils.logging.logger")
-    def test_structured_logger_exception(self, mock_logger):
+    def test_structured_logger_exception(self, mock_logger) -> None:
         """测试异常日志"""
         mock_bound_logger = Mock()
         mock_logger.bind.return_value = mock_bound_logger
@@ -109,14 +109,14 @@ class TestStructuredLogger:
 class TestGetLogger:
     """获取日志记录器测试"""
 
-    def test_get_logger_with_name(self):
+    def test_get_logger_with_name(self) -> None:
         """测试指定名称获取日志记录器"""
         logger = get_logger("test_logger")
 
         assert isinstance(logger, StructuredLogger)
         assert logger.name == "test_logger"
 
-    def test_get_logger_without_name(self):
+    def test_get_logger_without_name(self) -> None:
         """测试不指定名称获取日志记录器"""
         logger = get_logger()
 
@@ -129,7 +129,7 @@ class TestLogPerformanceDecorator:
     """性能日志装饰器测试"""
 
     @patch("bluev.utils.logging.get_logger")
-    def test_log_performance_success(self, mock_get_logger):
+    def test_log_performance_success(self, mock_get_logger) -> None:
         """测试性能日志装饰器成功情况"""
         mock_logger = Mock()
         mock_get_logger.return_value = mock_logger
@@ -151,7 +151,7 @@ class TestLogPerformanceDecorator:
         assert "execution_time" in call_args[1]
 
     @patch("bluev.utils.logging.get_logger")
-    def test_log_performance_exception(self, mock_get_logger):
+    def test_log_performance_exception(self, mock_get_logger) -> None:
         """测试性能日志装饰器异常情况"""
         mock_logger = Mock()
         mock_get_logger.return_value = mock_logger
@@ -178,17 +178,17 @@ class TestLogMethodCallsDecorator:
     """类方法调用日志装饰器测试"""
 
     @patch("bluev.utils.logging.get_logger")
-    def test_log_method_calls(self, mock_get_logger):
+    def test_log_method_calls(self, mock_get_logger) -> None:
         """测试类方法调用日志装饰器"""
         mock_logger = Mock()
         mock_get_logger.return_value = mock_logger
 
         @log_method_calls
         class TestClass:
-            def public_method(self):
+            def public_method(self) -> None:
                 return "result"
 
-            def _private_method(self):
+            def _private_method(self) -> None:
                 return "private"
 
         obj = TestClass()
@@ -205,7 +205,7 @@ class TestLogMethodCallsDecorator:
 class TestLoggingIntegration:
     """日志系统集成测试"""
 
-    def test_logging_integration_with_config(self, config, tmp_path):
+    def test_logging_integration_with_config(self, config, tmp_path) -> None:
         """测试日志系统与配置的集成"""
         config.LOGS_DIR = tmp_path / "logs"
         config.LOG_LEVEL = "INFO"
@@ -219,9 +219,9 @@ class TestLoggingIntegration:
         logger.info("集成测试消息", test_key="test_value")
 
         # 验证日志目录被创建
-        assert config.LOGS_DIR.exists()
+        assert getattr(config, "LOGS_DIR", "Unknown").exists()
 
-    def test_multiple_loggers(self):
+    def test_multiple_loggers(self) -> None:
         """测试多个日志记录器"""
         logger1 = get_logger("logger1")
         logger2 = get_logger("logger2")

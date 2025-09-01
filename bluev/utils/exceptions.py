@@ -183,10 +183,10 @@ class ExceptionContext:
         self.reraise = reraise
         self.exception_class = exception_class
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
         if exc_type is not None:
             handle_exception(exc_value, context=self.context, reraise=self.reraise)
         return not self.reraise  # 如果不重新抛出，则抑制异常

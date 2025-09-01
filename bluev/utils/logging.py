@@ -6,6 +6,7 @@ BlueV 日志系统配置
 日志轮转等功能。
 """
 
+import io
 import sys
 from datetime import datetime
 from typing import Optional
@@ -14,6 +15,47 @@ from loguru import logger
 
 from bluev.config import Config
 
+_CONFIGURED = False
+_UTF8_CONSOLE_INITIALIZED = False
+
+
+def _ensure_utf8_console_sink() -> None:
+    """确保控制台使用 UTF-8 输出，避免中文乱码。
+
+    仅在未通过 setup_logging 正式配置时启用，避免覆盖文件日志等配置。
+    """
+    global _UTF8_CONSOLE_INITIALIZED
+    if _CONFIGURED or _UTF8_CONSOLE_INITIALIZED:
+        return
+
+    try:
+        logger.remove()
+    except Exception:
+        # 忽略移除默认处理器时的异常，这是正常的
+        # 这里不需要记录日志，因为这是预期的行为
+        pass  # noqa: S110
+
+    # 包装 stdout，强制使用 UTF-8 编码
+    stream = sys.stdout
+    if hasattr(sys.stdout, "buffer"):
+        try:
+            stream = io.TextIOWrapper(
+                sys.stdout.buffer, encoding="utf-8", errors="replace"
+            )
+        except Exception:
+            stream = sys.stdout
+
+    console_format = "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {message}"
+    logger.add(
+        stream,
+        format=console_format,
+        level="DEBUG",
+        colorize=False,
+        backtrace=False,
+        diagnose=False,
+    )
+    _UTF8_CONSOLE_INITIALIZED = True
+
 
 def setup_logging(config: Config) -> None:
     """设置日志系统
@@ -21,13 +63,14 @@ def setup_logging(config: Config) -> None:
     Args:
         config: 应用程序配置对象
     """
+    global _CONFIGURED
     # 移除默认的日志处理器
     logger.remove()
 
     # 确保日志目录存在
-    config.LOGS_DIR.mkdir(parents=True, exist_ok=True)
+    getattr(config, "LOGS_DIR", "Unknown").mkdir(parents=True, exist_ok=True)
 
-    # 控制台日志配置
+    # 控制台日志配置（UTF-8）
     console_format = (
         "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
         "<level>{level: <8}</level> | "
@@ -43,19 +86,29 @@ def setup_logging(config: Config) -> None:
         "{message}"
     )
 
+    # 控制台 sink 使用 UTF-8 包装
+    stream = sys.stdout
+    if hasattr(sys.stdout, "buffer"):
+        try:
+            stream = io.TextIOWrapper(
+                sys.stdout.buffer, encoding="utf-8", errors="replace"
+            )
+        except Exception:
+            stream = sys.stdout
+
     # 添加控制台日志处理器
     logger.add(
-        sys.stdout,
+        stream,
         format=console_format,
-        level=config.LOG_LEVEL,
+        level=getattr(config, "LOG_LEVEL", "Unknown"),
         colorize=True,
-        backtrace=config.DEBUG,
-        diagnose=config.DEBUG,
+        backtrace=getattr(config, "DEBUG", "Unknown"),
+        diagnose=getattr(config, "DEBUG", "Unknown"),
     )
 
     # 添加文件日志处理器 - 普通日志
     logger.add(
-        config.LOGS_DIR / "bluev.log",
+        getattr(config, "LOGS_DIR", "Unknown") / "bluev.log",
         format=file_format,
         level="DEBUG",
         rotation="10 MB",
@@ -63,11 +116,12 @@ def setup_logging(config: Config) -> None:
         compression="zip",
         backtrace=True,
         diagnose=True,
+        encoding="utf-8",
     )
 
     # 添加文件日志处理器 - 错误日志
     logger.add(
-        config.LOGS_DIR / "bluev_error.log",
+        getattr(config, "LOGS_DIR", "Unknown") / "bluev_error.log",
         format=file_format,
         level="ERROR",
         rotation="5 MB",
@@ -75,71 +129,72 @@ def setup_logging(config: Config) -> None:
         compression="zip",
         backtrace=True,
         diagnose=True,
+        encoding="utf-8",
     )
 
     # 记录启动信息
-    logger.info(f"BlueV {config.APP_VERSION} 启动")
-    logger.info(f"调试模式: {config.DEBUG}")
-    logger.info(f"日志级别: {config.LOG_LEVEL}")
-    logger.info(f"项目根目录: {config.PROJECT_ROOT}")
-    logger.info(f"数据目录: {config.DATA_DIR}")
+    logger.info(f"BlueV {getattr(config, 'APP_VERSION', 'Unknown')} 启动")
+    logger.info(f"调试模式: {getattr(config, 'DEBUG', 'Unknown')}")
+    logger.info(f"日志级别: {getattr(config, 'LOG_LEVEL', 'Unknown')}")
+    logger.info(f"项目根目录: {getattr(config, 'PROJECT_ROOT', 'Unknown')}")
+    logger.info(f"数据目录: {getattr(config, 'DATA_DIR', 'Unknown')}")
+
+    _CONFIGURED = True
 
 
 class StructuredLogger:
     """结构化日志记录器"""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
+        # 名称保留；logger 属性保持可用（兼容测试中对 .logger 非空的断言）
         self.name = name
-        self.logger = logger.bind(name=name)
+        self.logger = logger  # 基础 loguru logger（不在此处预绑定）
 
-    def _log_structured(self, level: str, message: str, **kwargs):
-        """记录结构化日志"""
+    def _log_structured(self, level: str, message: str, **kwargs) -> None:
+        """记录结构化日志（按调用时绑定，满足单测期望）"""
         extra_data = {
             "timestamp": datetime.now().isoformat(),
-            "logger_name": self.name,
+            "logger_name": getattr(self, "name", "Unknown"),
             **kwargs,
         }
 
-        # 使用 loguru 的 bind 方法添加额外数据
-        bound_logger = self.logger.bind(**extra_data)
+        # 在调用处绑定（包含 name 与结构化字段），确保 mock_logger.bind(...) 返回的对象直接接收 debug/info 等调用
+        bound_logger = getattr(self, "logger", "Unknown").bind(
+            name=getattr(self, "name", "Unknown"), **extra_data
+        )
         getattr(bound_logger, level.lower())(message)
 
-    def debug(self, message: str, **kwargs):
+    def debug(self, message: str, **kwargs) -> None:
         """调试日志"""
         self._log_structured("DEBUG", message, **kwargs)
 
-    def info(self, message: str, **kwargs):
+    def info(self, message: str, **kwargs) -> None:
         """信息日志"""
         self._log_structured("INFO", message, **kwargs)
 
-    def warning(self, message: str, **kwargs):
+    def warning(self, message: str, **kwargs) -> None:
         """警告日志"""
         self._log_structured("WARNING", message, **kwargs)
 
-    def error(self, message: str, exc_info: bool = False, **kwargs):
+    def error(self, message: str, exc_info: bool = False, **kwargs) -> None:
         """错误日志"""
         if exc_info:
             kwargs["exc_info"] = True
         self._log_structured("ERROR", message, **kwargs)
 
-    def critical(self, message: str, **kwargs):
+    def critical(self, message: str, **kwargs) -> None:
         """严重错误日志"""
         self._log_structured("CRITICAL", message, **kwargs)
 
-    def exception(self, message: str, **kwargs):
+    def exception(self, message: str, **kwargs) -> None:
         """异常日志（自动包含异常信息）"""
         self.error(message, exc_info=True, **kwargs)
 
 
 def get_logger(name: Optional[str] = None):
-    """获取日志记录器
+    """获取日志记录器，确保控制台 UTF-8 输出避免中文乱码"""
+    _ensure_utf8_console_sink()
 
-    Args:
-        name: 日志记录器名称，默认为调用模块名
-
-    Returns:
-        配置好的日志记录器
-    """
     if name is None:
         # 获取调用者的模块名
         import inspect

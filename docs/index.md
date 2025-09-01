@@ -104,6 +104,13 @@ graph TB
 - [DevOps 指南](development/devops-guide.md) - 现代化开发工具链
 - [故障排除](development/troubleshooting.md) - 常见问题解决方案
 
+### 🚀 开发计划
+- [总体开发计划](development-plan/master-plan.md) - 6周简化开发方案
+- [Phase 1: 核心节点系统](development-plan/phase-1/README.md) - 节点架构和基础实现
+- [Phase 2: 图像处理集成](development-plan/phase-2/README.md) - OpenCV 集成和算法实现
+- [Phase 3: 基础UI实现](development-plan/phase-3/README.md) - 用户界面和交互功能
+- [里程碑跟踪](development-plan/milestones.md) - 项目进度和质量监控
+
 ## 🤝 参与贡献
 
 我们欢迎所有形式的贡献！请查看 [最佳实践](development/best-practices.md) 了解如何参与项目开发。
