@@ -146,7 +146,7 @@ venv.bak/
 .ropeproject
 
 # mkdocs documentation
-# /site  # Temporarily allow site/ for GitHub Pages bootstrap
+site/
 
 # mypy
 .mypy_cache/
