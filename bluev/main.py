@@ -47,17 +47,13 @@ class BlueVApplication:
         app = QApplication(sys.argv)
 
         # 设置应用程序信息
-        app.setApplicationName(getattr(self.config, "APP_NAME", "BlueV"))
-        app.setApplicationVersion(getattr(self.config, "APP_VERSION", "0.1.0"))
+        app.setApplicationName(self.config.APP_NAME)
+        app.setApplicationVersion(self.config.APP_VERSION)
         app.setOrganizationName("BlueV Team")
         app.setOrganizationDomain("bluev.dev")
 
         # 设置应用程序图标
-        icon_path = (
-            getattr(self.config, "RESOURCES_DIR", Path("./resources"))
-            / "icons"
-            / "app_icon.png"
-        )
+        icon_path = self.config.RESOURCES_DIR / "icons" / "app_icon.png"
         if icon_path.exists():
             app.setWindowIcon(QIcon(str(icon_path)))
 
@@ -66,11 +62,11 @@ class BlueVApplication:
     def setup_directories(self) -> None:
         """创建必要的目录"""
         directories = [
-            getattr(self.config, "DATA_DIR", Path("./data")),
-            getattr(self.config, "TEMP_DIR", Path("./temp")),
-            getattr(self.config, "LOGS_DIR", Path("./logs")),
-            getattr(self.config, "WORKFLOWS_DIR", Path("./workflows")),
-            getattr(self.config, "SCREENSHOTS_DIR", Path("./screenshots")),
+            self.config.DATA_DIR,
+            self.config.TEMP_DIR,
+            self.config.LOGS_DIR,
+            self.config.WORKFLOWS_DIR,
+            self.config.SCREENSHOTS_DIR,
         ]
 
         for directory in directories:
@@ -80,12 +76,11 @@ class BlueVApplication:
         """设置信号处理器"""
 
         def signal_handler(signum: int, frame: Optional[object]) -> None:
-            getattr(self, "logger", "Unknown").info(
-                f"接收到信号 {signum}，准备关闭应用程序"
-            )
+            if self.logger:
+                self.logger.info(f"接收到信号 {signum}，准备关闭应用程序")
             self._shutdown_requested = True
-            if getattr(self, "app", "Unknown"):
-                getattr(self, "app", "Unknown").quit()
+            if self.app:
+                self.app.quit()
 
         # 设置信号处理器
         signal.signal(signal.SIGINT, signal_handler)
@@ -103,14 +98,13 @@ class BlueVApplication:
                 return
 
             # 记录异常
-            getattr(self, "logger", "Unknown").error(
-                "未处理的异常", exc_info=(exc_type, exc_value, exc_traceback)
-            )
+            if self.logger:
+                self.logger.error(
+                    "未处理的异常", exc_info=(exc_type, exc_value, exc_traceback)
+                )
 
             # 显示错误对话框
-            if getattr(self, "app", "Unknown") and not getattr(
-                self, "_shutdown_requested", "Unknown"
-            ):
+            if self.app and not self._shutdown_requested:
                 error_msg = f"发生未处理的错误:\n{exc_type.__name__}: {exc_value}"
                 QMessageBox.critical(None, "BlueV 错误", error_msg)
 
@@ -120,9 +114,9 @@ class BlueVApplication:
         """运行应用程序"""
         try:
             # 设置日志系统
-            setup_logging(getattr(self, "config", "Unknown"))
+            setup_logging(self.config)
             self.logger = get_logger(__name__)
-            getattr(self, "logger", "Unknown").info("BlueV 应用程序启动")
+            self.logger.info("BlueV 应用程序启动")
 
             # 设置异常处理和信号处理
             self.setup_exception_handler()
@@ -135,31 +129,31 @@ class BlueVApplication:
             self.app = self.setup_application()
 
             # 创建主窗口
-            self.main_window = MainWindow(getattr(self, "config", "Unknown"))
-            getattr(self, "main_window", "Unknown").show()
+            self.main_window = MainWindow(self.config)
+            self.main_window.show()
 
-            getattr(self, "logger", "Unknown").info("BlueV 应用程序启动完成")
+            self.logger.info("BlueV 应用程序启动完成")
 
             # 启动事件循环
-            return getattr(self, "app", "Unknown").exec()
+            return self.app.exec()
 
         except BlueVCriticalError as e:
             error_msg = f"严重错误: {e}"
             print(f"❌ {error_msg}")
-            if getattr(self, "logger", "Unknown"):
-                getattr(self, "logger", "Unknown").critical(error_msg)
+            if self.logger:
+                self.logger.critical(error_msg)
             return 2
         except BlueVException as e:
             error_msg = f"应用程序错误: {e}"
             print(f"❌ {error_msg}")
-            if getattr(self, "logger", "Unknown"):
-                getattr(self, "logger", "Unknown").error(error_msg)
+            if self.logger:
+                self.logger.error(error_msg)
             return 1
         except Exception as e:
             error_msg = f"未知错误: {e}"
             print(f"❌ {error_msg}")
-            if getattr(self, "logger", "Unknown"):
-                getattr(self, "logger", "Unknown").error(error_msg, exc_info=True)
+            if self.logger:
+                self.logger.error(error_msg, exc_info=True)
             else:
                 traceback.print_exc()
             return 1

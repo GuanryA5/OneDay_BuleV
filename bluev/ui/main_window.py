@@ -36,21 +36,19 @@ class MainWindow(QMainWindow):
         self.setup_toolbar()
         self.setup_statusbar()
 
-        getattr(self, "logger", "Unknown").info("主窗口初始化完成")
+        self.logger.info("主窗口初始化完成")
 
     def setup_ui(self) -> None:
         """设置用户界面"""
         # 设置窗口属性
-        self.setWindowTitle(
-            f"{getattr(self.config, 'APP_NAME', 'Unknown')} v{getattr(self.config, 'APP_VERSION', 'Unknown')}"
-        )
+        self.setWindowTitle(f"{self.config.APP_NAME} v{self.config.APP_VERSION}")
         self.setMinimumSize(
-            getattr(self.config, "WINDOW_MIN_WIDTH", "Unknown"),
-            getattr(self.config, "WINDOW_MIN_HEIGHT", "Unknown"),
+            self.config.WINDOW_MIN_WIDTH,
+            self.config.WINDOW_MIN_HEIGHT,
         )
         self.resize(
-            getattr(self.config, "WINDOW_WIDTH", "Unknown"),
-            getattr(self.config, "WINDOW_HEIGHT", "Unknown"),
+            self.config.WINDOW_WIDTH,
+            self.config.WINDOW_HEIGHT,
         )
 
         # 创建中央部件
@@ -128,24 +126,24 @@ class MainWindow(QMainWindow):
 
         new_action = QAction("新建工作流(&N)", self)
         new_action.setShortcut("Ctrl+N")
-        new_action.triggered.connect(getattr(self, "new_workflow", "Unknown"))
+        new_action.triggered.connect(self.new_workflow)
         file_menu.addAction(new_action)
 
         open_action = QAction("打开工作流(&O)", self)
         open_action.setShortcut("Ctrl+O")
-        open_action.triggered.connect(getattr(self, "open_workflow", "Unknown"))
+        open_action.triggered.connect(self.open_workflow)
         file_menu.addAction(open_action)
 
         save_action = QAction("保存工作流(&S)", self)
         save_action.setShortcut("Ctrl+S")
-        save_action.triggered.connect(getattr(self, "save_workflow", "Unknown"))
+        save_action.triggered.connect(self.save_workflow)
         file_menu.addAction(save_action)
 
         file_menu.addSeparator()
 
         exit_action = QAction("退出(&X)", self)
         exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(getattr(self, "close", "Unknown"))
+        exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
         # 编辑菜单
@@ -153,12 +151,12 @@ class MainWindow(QMainWindow):
 
         undo_action = QAction("撤销(&U)", self)
         undo_action.setShortcut("Ctrl+Z")
-        undo_action.triggered.connect(getattr(self, "undo", "Unknown"))
+        undo_action.triggered.connect(self.undo)
         edit_menu.addAction(undo_action)
 
         redo_action = QAction("重做(&R)", self)
         redo_action.setShortcut("Ctrl+Y")
-        redo_action.triggered.connect(getattr(self, "redo", "Unknown"))
+        redo_action.triggered.connect(self.redo)
         edit_menu.addAction(redo_action)
 
         # 运行菜单
@@ -166,19 +164,19 @@ class MainWindow(QMainWindow):
 
         start_action = QAction("开始执行(&S)", self)
         start_action.setShortcut("F5")
-        start_action.triggered.connect(getattr(self, "start_workflow", "Unknown"))
+        start_action.triggered.connect(self.start_workflow)
         run_menu.addAction(start_action)
 
         stop_action = QAction("停止执行(&T)", self)
         stop_action.setShortcut("Shift+F5")
-        stop_action.triggered.connect(getattr(self, "stop_workflow", "Unknown"))
+        stop_action.triggered.connect(self.stop_workflow)
         run_menu.addAction(stop_action)
 
         # 帮助菜单
         help_menu = menubar.addMenu("帮助(&H)")
 
         about_action = QAction("关于 BlueV(&A)", self)
-        about_action.triggered.connect(getattr(self, "show_about", "Unknown"))
+        about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
 
     def setup_toolbar(self) -> None:
@@ -188,29 +186,29 @@ class MainWindow(QMainWindow):
 
         # 新建按钮
         new_action = QAction("新建", self)
-        new_action.triggered.connect(getattr(self, "new_workflow", "Unknown"))
+        new_action.triggered.connect(self.new_workflow)
         toolbar.addAction(new_action)
 
         # 打开按钮
         open_action = QAction("打开", self)
-        open_action.triggered.connect(getattr(self, "open_workflow", "Unknown"))
+        open_action.triggered.connect(self.open_workflow)
         toolbar.addAction(open_action)
 
         # 保存按钮
         save_action = QAction("保存", self)
-        save_action.triggered.connect(getattr(self, "save_workflow", "Unknown"))
+        save_action.triggered.connect(self.save_workflow)
         toolbar.addAction(save_action)
 
         toolbar.addSeparator()
 
         # 运行按钮
         start_action = QAction("运行", self)
-        start_action.triggered.connect(getattr(self, "start_workflow", "Unknown"))
+        start_action.triggered.connect(self.start_workflow)
         toolbar.addAction(start_action)
 
         # 停止按钮
         stop_action = QAction("停止", self)
-        stop_action.triggered.connect(getattr(self, "stop_workflow", "Unknown"))
+        stop_action.triggered.connect(self.stop_workflow)
         toolbar.addAction(stop_action)
 
     def setup_statusbar(self) -> None:
@@ -222,43 +220,43 @@ class MainWindow(QMainWindow):
         statusbar.addWidget(self.status_label)
 
         # 版本信息
-        version_label = QLabel(f"v{getattr(self.config, 'APP_VERSION', 'Unknown')}")
+        version_label = QLabel(f"v{self.config.APP_VERSION}")
         statusbar.addPermanentWidget(version_label)
 
     # 菜单和工具栏事件处理方法
     def new_workflow(self) -> None:
         """新建工作流"""
-        getattr(self, "logger", "Unknown").info("新建工作流")
+        self.logger.info("新建工作流")
         self.status_label.setText("新建工作流")
 
     def open_workflow(self) -> None:
         """打开工作流"""
-        getattr(self, "logger", "Unknown").info("打开工作流")
+        self.logger.info("打开工作流")
         self.status_label.setText("打开工作流")
 
     def save_workflow(self) -> None:
         """保存工作流"""
-        getattr(self, "logger", "Unknown").info("保存工作流")
+        self.logger.info("保存工作流")
         self.status_label.setText("保存工作流")
 
     def undo(self) -> None:
         """撤销操作"""
-        getattr(self, "logger", "Unknown").info("撤销操作")
+        self.logger.info("撤销操作")
         self.status_label.setText("撤销操作")
 
     def redo(self) -> None:
         """重做操作"""
-        getattr(self, "logger", "Unknown").info("重做操作")
+        self.logger.info("重做操作")
         self.status_label.setText("重做操作")
 
     def start_workflow(self) -> None:
         """开始执行工作流"""
-        getattr(self, "logger", "Unknown").info("开始执行工作流")
+        self.logger.info("开始执行工作流")
         self.status_label.setText("正在执行工作流...")
 
     def stop_workflow(self) -> None:
         """停止执行工作流"""
-        getattr(self, "logger", "Unknown").info("停止执行工作流")
+        self.logger.info("停止执行工作流")
         self.status_label.setText("工作流已停止")
 
     def show_about(self) -> None:
@@ -269,7 +267,7 @@ class MainWindow(QMainWindow):
             self,
             "关于 BlueV",
             f"""
-            <h3>BlueV v{getattr(self.config, "APP_VERSION", "Unknown")}</h3>
+            <h3>BlueV v{self.config.APP_VERSION}</h3>
             <p>游戏自动化蓝图框架</p>
             <p>一个基于 PySide6 的可视化游戏自动化工具</p>
             <p>Copyright © 2025 BlueV Team</p>
@@ -278,5 +276,5 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         """窗口关闭事件"""
-        getattr(self, "logger", "Unknown").info("主窗口关闭")
+        self.logger.info("主窗口关闭")
         event.accept()
