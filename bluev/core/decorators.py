@@ -94,7 +94,10 @@ def bluev_node(
 
 
 def input_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+    node_type: str,
+    display_name: Optional[str] = None,
+    description: str = "",
+    **kwargs: Any,
 ) -> Callable[[type], type]:
     """
     输入节点装饰器
@@ -121,7 +124,10 @@ def input_node(
 
 
 def output_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+    node_type: str,
+    display_name: Optional[str] = None,
+    description: str = "",
+    **kwargs: Any,
 ) -> Callable[[type], type]:
     """
     输出节点装饰器
@@ -148,7 +154,10 @@ def output_node(
 
 
 def image_processing_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+    node_type: str,
+    display_name: Optional[str] = None,
+    description: str = "",
+    **kwargs: Any,
 ) -> Callable[[type], type]:
     """
     图像处理节点装饰器
@@ -175,7 +184,10 @@ def image_processing_node(
 
 
 def control_flow_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+    node_type: str,
+    display_name: Optional[str] = None,
+    description: str = "",
+    **kwargs: Any,
 ) -> Callable[[type], type]:
     """
     控制流节点装饰器
@@ -202,7 +214,10 @@ def control_flow_node(
 
 
 def user_interaction_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+    node_type: str,
+    display_name: Optional[str] = None,
+    description: str = "",
+    **kwargs: Any,
 ) -> Callable[[type], type]:
     """
     用户交互节点装饰器
@@ -229,7 +244,10 @@ def user_interaction_node(
 
 
 def utility_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+    node_type: str,
+    display_name: Optional[str] = None,
+    description: str = "",
+    **kwargs: Any,
 ) -> Callable[[type], type]:
     """
     工具节点装饰器
@@ -290,7 +308,7 @@ def deprecated_node(reason: str = "") -> Callable[[type], type]:
             logger.warning(f"使用了废弃的节点类型: {cls.__name__}. {reason}")
             original_init(self, *args, **kwargs)
 
-        setattr(cls, '__init__', _deprecated_init_wrapper)  # noqa: B010
+        setattr(cls, "__init__", _deprecated_init_wrapper)  # noqa: B010
 
         return cls
 

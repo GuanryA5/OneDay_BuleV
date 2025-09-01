@@ -12,7 +12,7 @@ from typing import Any, Callable, Dict, Optional, TypeVar
 from bluev.utils.logging import get_logger
 
 # 定义类型变量
-F = TypeVar('F', bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 def retry(
@@ -106,7 +106,7 @@ def timeout(seconds: float) -> Callable[[F], F]:
                 def timeout_handler(signum: int, frame: Any) -> None:
                     raise TimeoutError(f"函数 {func.__name__} 执行超时 ({seconds}秒)")
 
-                if hasattr(signal, 'SIGALRM') and hasattr(signal, 'alarm'):
+                if hasattr(signal, "SIGALRM") and hasattr(signal, "alarm"):
                     old_handler = signal.signal(signal.SIGALRM, timeout_handler)
                     signal.alarm(int(seconds))  # type: ignore
 
@@ -192,8 +192,12 @@ def cache_result(ttl: Optional[float] = None) -> Callable[[F], F]:
             return result
 
         # 添加清除缓存的方法
-        setattr(wrapper, 'clear_cache', lambda: cache.clear())  # noqa: B010
-        setattr(wrapper, 'cache_info', lambda: {"cache_size": len(cache), "cache_keys": list(cache.keys())})  # noqa: B010
+        setattr(wrapper, "clear_cache", lambda: cache.clear())  # noqa: B010
+        setattr(
+            wrapper,
+            "cache_info",
+            lambda: {"cache_size": len(cache), "cache_keys": list(cache.keys())},
+        )  # noqa: B010
 
         return wrapper  # type: ignore
 
@@ -241,9 +245,7 @@ def deprecated(reason: str = "") -> Callable[[F], F]:
     return decorator
 
 
-def safe_call(
-    default_return: Any = None, log_errors: bool = True
-) -> Callable[[F], F]:
+def safe_call(default_return: Any = None, log_errors: bool = True) -> Callable[[F], F]:
     """安全调用装饰器，捕获异常并返回默认值
 
     Args:

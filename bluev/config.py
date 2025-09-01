@@ -118,7 +118,9 @@ class Config:
                     if isinstance(data, dict):
                         return data
                     else:
-                        raise BlueVConfigurationError(f"配置文件 {config_file} 格式错误：根对象必须是字典")
+                        raise BlueVConfigurationError(
+                            f"配置文件 {config_file} 格式错误：根对象必须是字典"
+                        )
 
             except (OSError, json.JSONDecodeError) as e:
                 raise BlueVConfigurationError(f"无法加载配置文件 {config_file}: {e}")

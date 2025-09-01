@@ -92,7 +92,9 @@ class BlueVApplication:
         import types
 
         def handle_exception(
-            exc_type: type, exc_value: Exception, exc_traceback: Optional[types.TracebackType]
+            exc_type: type,
+            exc_value: Exception,
+            exc_traceback: Optional[types.TracebackType],
         ) -> None:
             if issubclass(exc_type, KeyboardInterrupt):
                 # 允许 KeyboardInterrupt 正常处理
@@ -101,9 +103,7 @@ class BlueVApplication:
 
             # 记录异常
             if self.logger:
-                self.logger.error(
-                    "未处理的异常", exc_info=True
-                )
+                self.logger.error("未处理的异常", exc_info=True)
 
             # 显示错误对话框
             if self.app and not self._shutdown_requested:
