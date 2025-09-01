@@ -63,7 +63,7 @@ class LogNode(BaseNode):
             ),
             NodeInput(
                 name="extra_data",
-                data_type=Optional[Dict[str, Any]],
+                data_type=Optional[Dict[str, Any]],  # type: ignore
                 default_value=None,
                 required=False,
                 description="额外的结构化数据字典",
@@ -97,6 +97,7 @@ class LogNode(BaseNode):
     def get_metadata(cls) -> NodeMetadata:
         """获取节点元数据"""
         return NodeMetadata(
+            node_type="log_node",
             display_name="日志输出",
             description="输出结构化日志信息，支持多种日志级别",
             category="utility",

@@ -51,7 +51,7 @@ class DelayNode(BaseNode):
             ),
             NodeInput(
                 name="random_range",
-                data_type=Optional[float],
+                data_type=Optional[float],  # type: ignore
                 default_value=None,
                 required=False,
                 description="随机范围（秒），None表示固定延迟",
@@ -83,6 +83,7 @@ class DelayNode(BaseNode):
     def get_metadata(cls) -> NodeMetadata:
         """获取节点元数据"""
         return NodeMetadata(
+            node_type="delay_node",
             display_name="延迟等待",
             description="延迟指定时间，支持固定和随机延迟",
             category="control_flow",

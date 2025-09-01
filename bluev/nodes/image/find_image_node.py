@@ -90,7 +90,7 @@ class FindImageNode(BaseNode):
             NodeOutput(name="found", data_type=bool, description="是否找到匹配"),
             NodeOutput(
                 name="location",
-                data_type=Optional[Tuple[int, int]],
+                data_type=Optional[Tuple[int, int]],  # type: ignore
                 description="匹配位置 (x, y)，如果未找到则为 None",
             ),
             NodeOutput(
@@ -98,7 +98,7 @@ class FindImageNode(BaseNode):
             ),
             NodeOutput(
                 name="match_rect",
-                data_type=Optional[Tuple[int, int, int, int]],
+                data_type=Optional[Tuple[int, int, int, int]],  # type: ignore
                 description="匹配矩形区域 (x, y, width, height)",
             ),
             NodeOutput(
@@ -110,6 +110,7 @@ class FindImageNode(BaseNode):
     def get_metadata(cls) -> NodeMetadata:
         """获取节点元数据"""
         return NodeMetadata(
+            node_type="find_image_node",
             display_name="图像查找",
             description="在源图像中查找模板图像，返回匹配位置和置信度",
             category="image_processing",

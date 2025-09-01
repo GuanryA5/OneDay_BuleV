@@ -46,14 +46,14 @@ class ScreenshotNode(BaseNode):
         return [
             NodeInput(
                 name="region",
-                data_type=Optional[Tuple[int, int, int, int]],
+                data_type=Optional[Tuple[int, int, int, int]],  # type: ignore
                 default_value=None,
                 required=False,
                 description="截图区域 (x, y, width, height)，None表示全屏",
             ),
             NodeInput(
                 name="save_path",
-                data_type=Optional[str],
+                data_type=Optional[str],  # type: ignore
                 default_value=None,
                 required=False,
                 description="保存路径，None表示不保存文件",
@@ -78,12 +78,12 @@ class ScreenshotNode(BaseNode):
             ),
             NodeOutput(
                 name="image_path",
-                data_type=Optional[str],
+                data_type=Optional[str],  # type: ignore
                 description="保存的图片文件路径，如果未保存则为 None",
             ),
             NodeOutput(
                 name="image_size",
-                data_type=Tuple[int, int],
+                data_type=Tuple[int, int],  # type: ignore
                 description="图像尺寸 (width, height)",
             ),
             NodeOutput(name="capture_time", data_type=str, description="截图时间戳"),
@@ -93,6 +93,7 @@ class ScreenshotNode(BaseNode):
     def get_metadata(cls) -> NodeMetadata:
         """获取节点元数据"""
         return NodeMetadata(
+            node_type="screenshot_node",
             display_name="屏幕截图",
             description="捕获屏幕截图，支持全屏和区域截图",
             category="image_processing",

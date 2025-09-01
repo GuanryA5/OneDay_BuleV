@@ -160,7 +160,7 @@ class Config:
                     # 只传递 ConfigModel 需要的字段
                     if key in ConfigModel.model_fields:
                         validated_data[key] = value
-                self._model = ConfigModel(**validated_data)  # type: ignore
+                self._model = ConfigModel(**validated_data)
             except Exception as e:
                 raise BlueVConfigurationError(f"配置验证失败: {e}") from e
 

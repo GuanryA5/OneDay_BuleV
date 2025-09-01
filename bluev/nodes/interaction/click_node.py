@@ -124,7 +124,7 @@ class ClickNode(BaseNode):
             ),
             NodeOutput(
                 name="click_location",
-                data_type=Tuple[int, int],
+                data_type=Tuple[int, int],  # type: ignore
                 description="实际点击的位置坐标",
             ),
             NodeOutput(
@@ -132,7 +132,7 @@ class ClickNode(BaseNode):
             ),
             NodeOutput(
                 name="error_message",
-                data_type=Optional[str],
+                data_type=Optional[str],  # type: ignore
                 description="错误信息，成功时为 None",
             ),
         ]
@@ -141,6 +141,7 @@ class ClickNode(BaseNode):
     def get_metadata(cls) -> NodeMetadata:
         """获取节点元数据"""
         return NodeMetadata(
+            node_type="click_node",
             display_name="鼠标点击",
             description="执行鼠标点击操作，支持多种点击模式",
             category="user_interaction",

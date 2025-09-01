@@ -33,8 +33,8 @@ class SystemAdapter:
 class WindowsAdapter(SystemAdapter):
     """Windows 实现，使用 Pillow.ImageGrab 与 pyautogui。"""
 
-    def _ensure_pyautogui(self) -> None:
-        import pyautogui
+    def _ensure_pyautogui(self) -> Any:
+        import pyautogui  # type: ignore
 
         # 合理的默认安全设置
         pyautogui.FAILSAFE = True
@@ -42,7 +42,7 @@ class WindowsAdapter(SystemAdapter):
             pyautogui.PAUSE = 0.1
         return pyautogui
 
-    def screenshot(self, region: tuple[int, int, int, int] | None = None) -> None:
+    def screenshot(self, region: tuple[int, int, int, int] | None = None) -> Any:
         from PIL import ImageGrab
 
         bbox = None

@@ -72,10 +72,11 @@ def bluev_node(
         )
 
         # 为类添加get_metadata方法
-        def get_metadata_func(cls: type) -> NodeMetadata:
+        @classmethod
+        def get_metadata(cls: type) -> NodeMetadata:
             return metadata
 
-        setattr(cls, 'get_metadata', classmethod(get_metadata_func))
+        cls.get_metadata = get_metadata  # type: ignore
 
         # 注册节点
         try:
@@ -273,7 +274,7 @@ def deprecated_node(reason: str = "") -> Callable[[type], type]:
         original_get_metadata = cls.get_metadata
 
         @classmethod
-        def get_metadata(cls) -> NodeMetadata:
+        def get_metadata(cls: type) -> NodeMetadata:
             metadata = original_get_metadata()
             # 添加废弃标记
             metadata.tags.append("deprecated")
@@ -281,7 +282,7 @@ def deprecated_node(reason: str = "") -> Callable[[type], type]:
                 metadata.description += f" [已废弃: {reason}]"
             return metadata
 
-        cls.get_metadata = get_metadata
+        cls.get_metadata = get_metadata  # type: ignore
 
         # 添加废弃警告
         original_init = cls.__init__
