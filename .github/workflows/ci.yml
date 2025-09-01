@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
 
 env:
-  # 与本地环境一致的配置 (Windows + Git Bash + Conda)
-  PYTHON_VERSION: '3.12.11'
-  CACHE_VERSION: 'v2'
+  # GitHub Actions 兼容配置 (Windows + Git Bash + Conda)
+  PYTHON_VERSION: '3.12.3'  # GitHub Actions Windows 2022 支持的版本
+  CACHE_VERSION: 'v3'
   CONDA_ENV: 'bluev-dev'
 
 concurrency:
@@ -18,9 +18,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 快速检查 - Windows 环境 (与本地一致)
+  # 快速检查 - Windows 环境 (GitHub Actions 兼容)
   quick-check:
-    name: Quick Check (Python 3.12.11 - Windows)
+    name: Quick Check (Python 3.12.3 - Windows)
     runs-on: windows-latest
     timeout-minutes: 15
 
