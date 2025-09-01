@@ -73,21 +73,49 @@ def timeout(seconds: float) -> Callable[[F], F]:
     def decorator(func: F) -> F:
         @functools.wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            import signal
+            import platform
+            import threading
+            import time
 
-            def timeout_handler(signum: int, frame: Any) -> None:
-                raise TimeoutError(f"函数 {func.__name__} 执行超时 ({seconds}秒)")
+            if platform.system() == "Windows":
+                # Windows 不支持 SIGALRM，使用线程实现超时
+                result = [None]
+                exception = [None]
 
-            # 设置信号处理器
-            old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-            signal.alarm(int(seconds))
+                def target():
+                    try:
+                        result[0] = func(*args, **kwargs)
+                    except Exception as e:
+                        exception[0] = e
 
-            try:
-                result = func(*args, **kwargs)
-                signal.alarm(0)  # 取消定时器
-                return result
-            finally:
-                signal.signal(signal.SIGALRM, old_handler)
+                thread = threading.Thread(target=target)
+                thread.daemon = True
+                thread.start()
+                thread.join(timeout=seconds)
+
+                if thread.is_alive():
+                    raise TimeoutError(f"函数 {func.__name__} 执行超时 ({seconds}秒)")
+
+                if exception[0]:
+                    raise exception[0]
+
+                return result[0]
+            else:
+                # Unix 系统使用信号
+                import signal
+
+                def timeout_handler(signum: int, frame: Any) -> None:
+                    raise TimeoutError(f"函数 {func.__name__} 执行超时 ({seconds}秒)")
+
+                old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                signal.alarm(int(seconds))
+
+                try:
+                    result = func(*args, **kwargs)
+                    signal.alarm(0)
+                    return result
+                finally:
+                    signal.signal(signal.SIGALRM, old_handler)
 
         return wrapper  # type: ignore
 
@@ -161,11 +189,11 @@ def cache_result(ttl: Optional[float] = None) -> Callable[[F], F]:
             return result
 
         # 添加清除缓存的方法
-        wrapper.clear_cache = lambda: cache.clear()
-        wrapper.cache_info = lambda: {
+        setattr(wrapper, 'clear_cache', lambda: cache.clear())
+        setattr(wrapper, 'cache_info', lambda: {
             "cache_size": len(cache),
             "cache_keys": list(cache.keys()),
-        }
+        })
 
         return wrapper  # type: ignore
 

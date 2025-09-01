@@ -9,7 +9,7 @@ BlueV 日志系统配置
 import io
 import sys
 from datetime import datetime
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from loguru import logger
 
@@ -199,8 +199,11 @@ def get_logger(name: Optional[str] = None) -> StructuredLogger:
         # 获取调用者的模块名
         import inspect
 
-        frame = inspect.currentframe().f_back
-        name = frame.f_globals.get("__name__", "bluev")
+        frame = inspect.currentframe()
+        if frame and frame.f_back:
+            name = frame.f_back.f_globals.get("__name__", "bluev")
+        else:
+            name = "bluev"
 
     return StructuredLogger(name)
 

@@ -60,7 +60,7 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(5, 5, 5, 5)
 
         # 创建分割器
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         main_layout.addWidget(splitter)
 
         # 左侧面板（节点库和属性面板）
@@ -85,7 +85,7 @@ class MainWindow(QMainWindow):
 
         # 临时标签，后续替换为实际组件
         label = QLabel("节点库\n(待实现)")
-        label.setAlignment(Qt.AlignCenter)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setStyleSheet("border: 1px solid gray; padding: 20px;")
         layout.addWidget(label)
 
@@ -98,7 +98,7 @@ class MainWindow(QMainWindow):
 
         # 临时标签，后续替换为节点编辑器
         label = QLabel("节点编辑器\n(待实现)")
-        label.setAlignment(Qt.AlignCenter)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setStyleSheet("border: 1px solid gray; padding: 50px;")
         layout.addWidget(label)
 
@@ -111,7 +111,7 @@ class MainWindow(QMainWindow):
 
         # 临时标签，后续替换为实际组件
         label = QLabel("属性面板\n和\n日志输出\n(待实现)")
-        label.setAlignment(Qt.AlignCenter)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         label.setStyleSheet("border: 1px solid gray; padding: 20px;")
         layout.addWidget(label)
 
@@ -182,7 +182,7 @@ class MainWindow(QMainWindow):
     def setup_toolbar(self) -> None:
         """设置工具栏"""
         toolbar = self.addToolBar("主工具栏")
-        toolbar.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        toolbar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
 
         # 新建按钮
         new_action = QAction("新建", self)

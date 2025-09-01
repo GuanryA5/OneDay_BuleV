@@ -154,7 +154,12 @@ class Config:
 
             # 验证配置
             try:
-                self._model = ConfigModel(**config_data)
+                # 类型转换以确保兼容性
+                validated_data = {}
+                for key, value in config_data.items():
+                    if hasattr(ConfigModel, key):
+                        validated_data[key] = value
+                self._model = ConfigModel(**validated_data)
             except Exception as e:
                 raise BlueVConfigurationError(f"配置验证失败: {e}") from e
 

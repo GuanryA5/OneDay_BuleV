@@ -24,7 +24,7 @@ from PySide6.QtWidgets import QApplication, QMessageBox
 from bluev.config import Config
 from bluev.ui.main_window import MainWindow
 from bluev.utils.exceptions import BlueVCriticalError, BlueVException
-from bluev.utils.logging import get_logger, setup_logging
+from bluev.utils.logging import StructuredLogger, get_logger, setup_logging
 
 
 class BlueVApplication:
@@ -34,7 +34,7 @@ class BlueVApplication:
         self.app: Optional[QApplication] = None
         self.main_window: Optional[MainWindow] = None
         self.config = Config()
-        self.logger = None
+        self.logger: Optional[StructuredLogger] = None
         self._shutdown_requested = False
 
     def setup_application(self) -> QApplication:
@@ -89,8 +89,10 @@ class BlueVApplication:
     def setup_exception_handler(self) -> None:
         """设置全局异常处理器"""
 
+        import types
+
         def handle_exception(
-            exc_type: type, exc_value: Exception, exc_traceback: Optional[object]
+            exc_type: type, exc_value: Exception, exc_traceback: Optional[types.TracebackType]
         ) -> None:
             if issubclass(exc_type, KeyboardInterrupt):
                 # 允许 KeyboardInterrupt 正常处理
@@ -108,7 +110,7 @@ class BlueVApplication:
                 error_msg = f"发生未处理的错误:\n{exc_type.__name__}: {exc_value}"
                 QMessageBox.critical(None, "BlueV 错误", error_msg)
 
-        sys.excepthook = handle_exception
+        sys.excepthook = exception_handler  # type: ignore
 
     def run(self) -> int:
         """运行应用程序"""
