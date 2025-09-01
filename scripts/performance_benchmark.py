@@ -290,7 +290,7 @@ class PerformanceBenchmark:
         print(f"通过: {passed}")
         print(f"失败: {failed}")
         print(f"错误: {errors}")
-        print(f"成功率: {passed/total*100:.1f}%")
+        print(f"成功率: {passed / total * 100:.1f}%")
         print()
 
         print("性能指标:")

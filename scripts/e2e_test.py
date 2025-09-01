@@ -246,7 +246,7 @@ class E2ETestRunner:
         print(f"总测试数: {total}")
         print(f"通过测试: {passed}")
         print(f"失败测试: {total - passed}")
-        print(f"成功率: {passed/total*100:.1f}%")
+        print(f"成功率: {passed / total * 100:.1f}%")
         print()
 
         print("详细结果:")
