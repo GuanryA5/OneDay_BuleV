@@ -16,7 +16,7 @@ BlueV 工作流加载器（最小实现）
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, Union
 
 from bluev.core.base_node import BaseNode
 from bluev.core.node_registry import NodeRegistry, node_registry
@@ -92,7 +92,7 @@ def _set_params_to_node(node: BaseNode, params: dict[str, Any]) -> None:
 
 def _resolve_single_port(node: BaseNode, kind: str) -> str:
     if kind == "input":
-        specs = node.get_input_spec()
+        specs: Union[list[NodeInput], list[NodeOutput]] = node.get_input_spec()
         preferred = ["image", "source_image", "input", "bbox", "location"]
     else:
         specs = node.get_output_spec()

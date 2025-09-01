@@ -79,10 +79,10 @@ def timeout(seconds: float) -> Callable[[F], F]:
 
             if platform.system() == "Windows":
                 # Windows 不支持 SIGALRM，使用线程实现超时
-                result = [None]
-                exception = [None]
+                result: list[Any] = [None]
+                exception: list[Exception] = [None]  # type: ignore
 
-                def target():
+                def target() -> None:
                     try:
                         result[0] = func(*args, **kwargs)
                     except Exception as e:
@@ -107,15 +107,19 @@ def timeout(seconds: float) -> Callable[[F], F]:
                 def timeout_handler(signum: int, frame: Any) -> None:
                     raise TimeoutError(f"函数 {func.__name__} 执行超时 ({seconds}秒)")
 
-                old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-                signal.alarm(int(seconds))
+                if hasattr(signal, 'SIGALRM') and hasattr(signal, 'alarm'):
+                    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                    signal.alarm(int(seconds))
 
-                try:
-                    result = func(*args, **kwargs)
-                    signal.alarm(0)
-                    return result
-                finally:
-                    signal.signal(signal.SIGALRM, old_handler)
+                    try:
+                        result = func(*args, **kwargs)
+                        signal.alarm(0)
+                        return result
+                    finally:
+                        signal.signal(signal.SIGALRM, old_handler)
+                else:
+                    # 如果信号不可用，直接执行函数
+                    return func(*args, **kwargs)
 
         return wrapper  # type: ignore
 

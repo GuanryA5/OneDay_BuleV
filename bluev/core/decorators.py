@@ -25,7 +25,7 @@ def bluev_node(
     author: str = "BlueV User",
     tags: Optional[List[str]] = None,
     icon: Optional[str] = None,
-):
+) -> Callable[[type], type]:
     """
     BlueV 节点装饰器
 
@@ -72,11 +72,10 @@ def bluev_node(
         )
 
         # 为类添加get_metadata方法
-        @classmethod
-        def get_metadata(cls) -> NodeMetadata:
+        def get_metadata_func(cls: type) -> NodeMetadata:
             return metadata
 
-        cls.get_metadata = get_metadata
+        setattr(cls, 'get_metadata', classmethod(get_metadata_func))
 
         # 注册节点
         try:
@@ -95,8 +94,8 @@ def bluev_node(
 
 
 def input_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs
-):
+    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+) -> Callable[[type], type]:
     """
     输入节点装饰器
 
@@ -122,8 +121,8 @@ def input_node(
 
 
 def output_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs
-):
+    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+) -> Callable[[type], type]:
     """
     输出节点装饰器
 
@@ -149,8 +148,8 @@ def output_node(
 
 
 def image_processing_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs
-):
+    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+) -> Callable[[type], type]:
     """
     图像处理节点装饰器
 
@@ -176,8 +175,8 @@ def image_processing_node(
 
 
 def control_flow_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs
-):
+    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+) -> Callable[[type], type]:
     """
     控制流节点装饰器
 
@@ -203,8 +202,8 @@ def control_flow_node(
 
 
 def user_interaction_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs
-):
+    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+) -> Callable[[type], type]:
     """
     用户交互节点装饰器
 
@@ -230,8 +229,8 @@ def user_interaction_node(
 
 
 def utility_node(
-    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs
-):
+    node_type: str, display_name: Optional[str] = None, description: str = "", **kwargs: Any
+) -> Callable[[type], type]:
     """
     工具节点装饰器
 
@@ -256,7 +255,7 @@ def utility_node(
     )
 
 
-def deprecated_node(reason: str = ""):
+def deprecated_node(reason: str = "") -> Callable[[type], type]:
     """
     废弃节点装饰器
 
@@ -288,7 +287,7 @@ def deprecated_node(reason: str = ""):
         original_init = cls.__init__
 
         @wraps(original_init)
-        def _deprecated_init_wrapper(self, *args, **kwargs) -> None:
+        def _deprecated_init_wrapper(self: Any, *args: Any, **kwargs: Any) -> None:
             logger.warning(f"使用了废弃的节点类型: {cls.__name__}. {reason}")
             original_init(self, *args, **kwargs)
 

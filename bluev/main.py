@@ -102,7 +102,7 @@ class BlueVApplication:
             # 记录异常
             if self.logger:
                 self.logger.error(
-                    "未处理的异常", exc_info=(exc_type, exc_value, exc_traceback)
+                    "未处理的异常", exc_info=True
                 )
 
             # 显示错误对话框
@@ -162,24 +162,24 @@ class BlueVApplication:
 
     def cleanup(self) -> None:
         """清理资源"""
-        if getattr(self, "logger", "Unknown"):
-            getattr(self, "logger", "Unknown").info("开始清理应用程序资源")
+        if self.logger:
+            self.logger.info("开始清理应用程序资源")
 
         try:
-            if getattr(self, "main_window", "Unknown"):
-                getattr(self, "main_window", "Unknown").close()
+            if self.main_window:
+                self.main_window.close()
                 self.main_window = None
 
-            if getattr(self, "app", "Unknown"):
-                getattr(self, "app", "Unknown").quit()
+            if self.app:
+                self.app.quit()
                 self.app = None
 
-            if getattr(self, "logger", "Unknown"):
-                getattr(self, "logger", "Unknown").info("应用程序资源清理完成")
+            if self.logger:
+                self.logger.info("应用程序资源清理完成")
         except Exception as e:
             print(f"清理资源时发生错误: {e}")
-            if getattr(self, "logger", "Unknown"):
-                getattr(self, "logger", "Unknown").error(f"清理资源时发生错误: {e}")
+            if self.logger:
+                self.logger.error(f"清理资源时发生错误: {e}")
 
 
 def main() -> int:

@@ -166,7 +166,7 @@ class ExecutionContext:
         else:
             self.logger.warning(f"未知的事件类型: {event_type}")
 
-    async def trigger_callback(self, event_type: str, **kwargs) -> None:
+    async def trigger_callback(self, event_type: str, **kwargs: Any) -> None:
         """
         触发回调函数
 
