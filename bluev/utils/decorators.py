@@ -7,7 +7,7 @@ BlueV 装饰器模块
 
 import functools
 import time
-from typing import Any, Callable, Dict, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 from bluev.utils.logging import get_logger
 
@@ -75,7 +75,6 @@ def timeout(seconds: float) -> Callable[[F], F]:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             import platform
             import threading
-            import time
 
             if platform.system() == "Windows":
                 # Windows 不支持 SIGALRM，使用线程实现超时
@@ -193,11 +192,8 @@ def cache_result(ttl: Optional[float] = None) -> Callable[[F], F]:
             return result
 
         # 添加清除缓存的方法
-        setattr(wrapper, 'clear_cache', lambda: cache.clear())
-        setattr(wrapper, 'cache_info', lambda: {
-            "cache_size": len(cache),
-            "cache_keys": list(cache.keys()),
-        })
+        setattr(wrapper, 'clear_cache', lambda: cache.clear())  # noqa: B010
+        setattr(wrapper, 'cache_info', lambda: {"cache_size": len(cache), "cache_keys": list(cache.keys())})  # noqa: B010
 
         return wrapper  # type: ignore
 

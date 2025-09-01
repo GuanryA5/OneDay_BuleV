@@ -290,7 +290,7 @@ def deprecated_node(reason: str = "") -> Callable[[type], type]:
             logger.warning(f"使用了废弃的节点类型: {cls.__name__}. {reason}")
             original_init(self, *args, **kwargs)
 
-        setattr(cls, '__init__', _deprecated_init_wrapper)
+        setattr(cls, '__init__', _deprecated_init_wrapper)  # noqa: B010
 
         return cls
 

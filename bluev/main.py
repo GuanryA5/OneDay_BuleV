@@ -110,7 +110,8 @@ class BlueVApplication:
                 error_msg = f"发生未处理的错误:\n{exc_type.__name__}: {exc_value}"
                 QMessageBox.critical(None, "BlueV 错误", error_msg)
 
-        sys.excepthook = exception_handler  # type: ignore
+        # 设置全局异常处理器
+        sys.excepthook = handle_exception  # type: ignore
 
     def run(self) -> int:
         """运行应用程序"""
