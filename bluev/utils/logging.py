@@ -33,8 +33,6 @@ def _ensure_utf8_console_sink() -> None:
     except Exception as e:
         # 忽略移除默认处理器时的异常，这是正常的
         # 记录调试信息以便排查问题
-        import sys
-
         print(f"Debug: 移除默认日志处理器时的预期异常: {e}", file=sys.stderr)
 
     # 包装 stdout，强制使用 UTF-8 编码
